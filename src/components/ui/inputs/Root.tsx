@@ -1,11 +1,11 @@
-import React, {
+import theme from '@constants/themes'
+import {
   type JSX,
   type Ref,
   useImperativeHandle,
   useRef,
   useState,
 } from 'react'
-
 import {
   type NativeSyntheticEvent,
   Platform,
@@ -14,13 +14,14 @@ import {
   TextInput,
   type TextInputFocusEventData,
   type TextInputProps,
+  type TextStyle,
   View,
   type ViewStyle,
 } from 'react-native'
 import { mask as maskParser } from 'react-native-mask-text'
 import type { FormatType } from 'react-native-mask-text/lib/typescript/src/@types/FormatType'
 
-import theme from '@constants/themes'
+import Texts from '../Texts'
 
 interface IRefProps {
   focus(): void
@@ -28,25 +29,30 @@ interface IRefProps {
 
 interface IProps {
   error?: string
-  fieldStyle?: StyleProp<
-    Pick<ViewStyle, 'backgroundColor' | 'borderColor' | 'flex'>
-  >
+  containerStyle?: StyleProp<Pick<ViewStyle, 'flex' | 'width'>>
+  fieldStyle?: StyleProp<Pick<ViewStyle, 'backgroundColor' | 'borderColor'>>
+  inputStyle?: StyleProp<Pick<TextStyle, 'textAlign' | 'height'>>
   iconLeft?(): JSX.Element
   iconRight?(): JSX.Element
   inputProps?: TextInputProps
   mask?: string
   maskType?: FormatType
   ref?: Ref<IRefProps>
+  label?: string
 }
 
 function InputRoot({
+  containerStyle = {},
   fieldStyle = {},
+  inputStyle = {},
   iconLeft: IconLeft,
   iconRight: IconRight,
   inputProps = {},
   mask,
   maskType,
   ref,
+  error,
+  label,
 }: IProps) {
   const inputRef = useRef<TextInput & TextInputProps>(null)
 
@@ -81,46 +87,66 @@ function InputRoot({
   }))
 
   return (
-    <View
-      style={[
-        styles.container,
-        fieldStyle,
-        isFocused && { borderColor: theme.colors.primary.green },
-      ]}>
-      {IconLeft && (
-        <View style={styles.iconContainer}>
-          <IconLeft />
+    <View style={[containerStyle]}>
+      {!!label && (
+        <View style={styles.labelContainer}>
+          <Texts.SemiBold
+            style={{
+              color: theme.colors.primary.green,
+            }}>
+            {label}
+          </Texts.SemiBold>
+          <Texts.SemiBold
+            style={{
+              color: theme.colors.utils.danger,
+            }}>
+            {error}
+          </Texts.SemiBold>
         </View>
       )}
+      <View
+        style={[
+          styles.container,
+          fieldStyle,
+          isFocused && styles.focused,
+          error && styles.error,
+        ]}>
+        {IconLeft && (
+          <View style={styles.iconContainer}>
+            <IconLeft />
+          </View>
+        )}
 
-      <TextInput
-        {...inputProps}
-        autoComplete="off"
-        autoCorrect={false}
-        onBlur={handleBlur}
-        onChangeText={handleChangeText}
-        onFocus={handleFocus}
-        placeholderTextColor={theme.colors.text.default}
-        ref={inputRef}
-        selectionColor={theme.colors.text.default}
-        style={styles.input}
-      />
+        <TextInput
+          {...inputProps}
+          autoComplete="off"
+          autoCorrect={false}
+          onBlur={handleBlur}
+          textAlignVertical="top"
+          onChangeText={handleChangeText}
+          onFocus={handleFocus}
+          placeholderTextColor={theme.colors.text.default}
+          ref={inputRef}
+          selectionColor={theme.colors.text.default}
+          style={[styles.input, inputStyle]}
+        />
 
-      {IconRight && (
-        <View style={styles.iconContainer}>
-          <IconRight />
-        </View>
-      )}
+        {IconRight && (
+          <View style={styles.iconContainer}>
+            <IconRight />
+          </View>
+        )}
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    height:
-      Platform.OS === 'android'
-        ? theme.input.height.android
-        : theme.input.height.iOS,
+    // height:
+    //   Platform.OS === 'android'
+    //     ? theme.input.height.android
+    //     : theme.input.height.iOS,
     alignItems: 'center',
     backgroundColor: theme.input.backgroundColor.primary,
     borderColor: theme.input.borderColor,
@@ -128,19 +154,20 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     flexDirection: 'row',
+    // width: '100%',
   },
   input: {
     color: theme.colors.text.default,
     fontFamily: 'Raleway',
     fontWeight: 500,
     fontSize: 16,
-    lineHeight: 22,
     height:
       Platform.OS === 'android'
         ? theme.input.height.android
         : theme.input.height.iOS,
     paddingHorizontal: 8,
     includeFontPadding: false,
+    flex: 1,
   },
   iconContainer: {
     paddingHorizontal: 8,
@@ -148,6 +175,17 @@ const styles = StyleSheet.create({
       Platform.OS === 'android'
         ? theme.input.height.android
         : theme.input.height.iOS,
+  },
+  error: {
+    borderColor: theme.colors.utils.danger,
+  },
+  focused: {
+    borderColor: theme.colors.primary.green,
+  },
+  labelContainer: {
+    marginBottom: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 })
 

@@ -1,13 +1,8 @@
-import React, {
-  createContext,
-  type PropsWithChildren,
-  useCallback,
-} from 'react'
-
-import storageKeys from '@constants/storageKeys'
-
 import { useStorageState } from '@config/useStorageState'
+import storageKeys from '@constants/storageKeys'
 import HttpClient from '@services/core/HttpClient'
+import { createContext, type PropsWithChildren, useCallback } from 'react'
+
 import type { UseAuth } from './index'
 
 const AuthContext = createContext<UseAuth>({

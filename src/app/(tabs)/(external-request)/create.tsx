@@ -1,26 +1,21 @@
-import Forms from '@components/forms'
+import ExternalRequestCreateForm from '@components/pages/tabs/external-request/create/Form'
+import Containers from '@components/ui/containers'
 import theme from '@constants/themes'
-import { StyleSheet } from 'react-native'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
 
 export default function TabExternalRequestCreate() {
-  const insets = useSafeAreaInsets()
-
   return (
-    <KeyboardAwareScrollView
-      bottomOffset={5}
-      extraKeyboardSpace={-insets.bottom}
-      contentContainerStyle={styles.contentContainer}>
-      <Forms.ExternalRequestCreate />
-    </KeyboardAwareScrollView>
+    <View style={styles.container}>
+      <Containers.Scroll style={{ rowGap: 16 }}>
+        <ExternalRequestCreateForm />
+      </Containers.Scroll>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    flexGrow: 1,
-    padding: 16,
+  container: {
+    flex: 1,
     backgroundColor: theme.colors.background.general,
   },
 })

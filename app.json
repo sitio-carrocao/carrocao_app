@@ -68,6 +68,13 @@
         {
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permitir que $(PRODUCT_NAME) acesse sua galeria de imagens.",
+          "cameraPermission": "Permitir que $(PRODUCT_NAME) acesse sua câmera."
+        }
       ]
     ],
     "experiments": {

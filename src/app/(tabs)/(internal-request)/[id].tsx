@@ -1,5 +1,5 @@
-import Texts from '@components/ui/Texts'
 import Containers from '@components/ui/containers'
+import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
 import EInternalRequestStatus from '@enums/internalRequestStatus'
 import StockService from '@services/stock/StockService'

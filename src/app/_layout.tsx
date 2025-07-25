@@ -1,10 +1,8 @@
-import theme from '@constants/themes'
 import Providers from '@contexts/providers'
+import useSession from '@contexts/session'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -18,23 +16,46 @@ SplashScreen.setOptions({
   fade: true,
 })
 
-export default function RootLayout() {
+export const unstable_settings = {
+  initialRouteName: '(tabs)',
+}
+
+function SplashScreenController() {
+  const { isLoading } = useSession()
+
+  if (!isLoading) {
+    SplashScreen.hide()
+  }
+
+  return null
+}
+
+function RootLayout() {
+  const { session } = useSession()
+
+  return (
+    // {/* <SafeAreaView
+    //   edges={['top']}
+    //   style={{ flex: 0, backgroundColor: theme.colors.background.general }}
+    // /> */}
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+    </Stack>
+  )
+}
+
+export default function Root() {
   return (
     <Providers>
-      <StatusBar style="dark" />
-      <SafeAreaView
-        edges={['top']}
-        style={{ flex: 0, backgroundColor: theme.colors.background.general }}
-      />
-      <SafeAreaView
-        edges={['bottom']}
-        style={{
-          flex: 1,
-        }}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)/sign-in" />
-        </Stack>
-      </SafeAreaView>
+      <StatusBar style="light" />
+      <SplashScreenController />
+      <RootLayout />
     </Providers>
   )
 }

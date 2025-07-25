@@ -1,8 +1,6 @@
-import React, { type PropsWithChildren } from 'react'
-
-import { type StyleProp, StyleSheet, Text, type TextStyle } from 'react-native'
-
 import theme from '@constants/themes'
+import React, { type PropsWithChildren } from 'react'
+import { type StyleProp, StyleSheet, Text, type TextStyle } from 'react-native'
 
 interface IProps extends PropsWithChildren {
   style?: StyleProp<

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react'
+
 import { storage } from './storage'
 
 type UseStateHook<T> = [[boolean, T | null], (value: T | null) => void]
@@ -30,9 +31,11 @@ export function useStorageState(key: string): UseStateHook<string> {
   // Get
   useEffect(() => {
     const value = storage.getString(key)
-    if (value) {
-      setState(value)
-    }
+    setState(value || null)
+    // if (value) {
+    // setState(value)
+
+    // }
   }, [key, setState])
 
   // Set

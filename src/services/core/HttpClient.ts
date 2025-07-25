@@ -1,18 +1,43 @@
+import { storage } from '@config/storage'
+import storageKeys from '@constants/storageKeys'
+import HttpClientError from '@errors/HttpClientError'
 import axios, {
   type AxiosInstance,
   type AxiosResponse,
   isAxiosError,
+  type RawAxiosRequestHeaders,
 } from 'axios'
-
-import HttpClientError from '@errors/HttpClientError'
+import { router } from 'expo-router'
 
 class HttpClient {
   private readonly instance: AxiosInstance
 
   constructor() {
     this.instance = axios.create({
-      baseURL: 'https://staging-ecommerce-api.guicheweb.com.br',
+      baseURL: 'http://localhost:3333',
     })
+    this.instance.interceptors.response.use(
+      success => {
+        return success
+      },
+      error => {
+        if (error.response) {
+          const { status } = error.response
+
+          if (status === 401) {
+            storage.delete(storageKeys.token)
+            this.removeBearerToken()
+            router.replace({
+              pathname: '/(auth)',
+            })
+          }
+
+          return Promise.reject(error)
+        }
+
+        return Promise.reject(error)
+      }
+    )
   }
 
   public async get<T = unknown, S = unknown>({
@@ -42,12 +67,14 @@ class HttpClient {
   public async post<T, S = unknown>({
     body,
     path,
+    headers,
   }: {
     body?: S
     path: string
+    headers?: RawAxiosRequestHeaders
   }): Promise<AxiosResponse<T>> {
     try {
-      const response = await this.instance.post<T>(path, body)
+      const response = await this.instance.post<T>(path, body, { headers })
       return response
     } catch (err) {
       if (isAxiosError(err)) {
@@ -120,10 +147,6 @@ class HttpClient {
 
   public setBearerToken(token: string): void {
     this.instance.defaults.headers.common.Authorization = `Bearer ${token}`
-  }
-
-  public setDeviceInfo(data: string): void {
-    this.instance.defaults.headers.common.FingerPrint = data
   }
 }
 

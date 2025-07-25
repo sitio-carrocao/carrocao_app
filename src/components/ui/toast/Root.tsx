@@ -1,16 +1,12 @@
-import React from 'react'
-
-import { StyleSheet, View } from 'react-native'
-
-import type { Icon as IconBase } from 'phosphor-react-native'
-
 import Texts from '@components/ui/Texts'
-
 import theme from '@constants/themes'
+import type { LucideIcon } from 'lucide-react-native'
+import React from 'react'
+import { StyleSheet, View } from 'react-native'
 
 interface IProps {
   backgroundColor: string
-  icon: IconBase
+  icon: LucideIcon
   message: string
   textColor: string
   title: string
@@ -25,7 +21,7 @@ const ToastRoot = ({
 }: IProps) => {
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <Icon color={textColor} size={30} weight="bold" />
+      <Icon color={textColor} size={30} strokeWidth={1.5} />
       <View>
         <Texts.Bold style={{ color: textColor, fontSize: 16 }}>
           {title}
@@ -45,7 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     padding: 16,
-    width: '90%',
+    marginHorizontal: 16,
   },
 })
 

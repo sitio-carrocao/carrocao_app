@@ -1,9 +1,7 @@
-import Button from '@components/ui/Button'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
 import useInternalRequestCart from '@contexts/internalRequestCart'
 import type IProduct from '@models/Product'
-
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 interface IProps {

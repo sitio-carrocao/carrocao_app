@@ -1,12 +1,11 @@
+import theme from '@constants/themes'
+import { CircleCheck, InfoIcon, OctagonAlert } from 'lucide-react-native'
 import React from 'react'
-
 import Toast, {
   type ToastConfig,
   type ToastConfigParams,
 } from 'react-native-toast-message'
 
-import theme from '@constants/themes'
-import { CircleCheck, InfoIcon, OctagonAlert } from 'lucide-react-native'
 import ToastRoot from './Root'
 
 interface IShowInputData {
@@ -55,8 +54,8 @@ const show = ({ message, title, type }: IShowInputData): void => {
     text1: title,
     text2: message,
     type,
-    visibilityTime: 2000,
-    topOffset: 55,
+    visibilityTime: 3000,
+    // topOffset: 55,
   })
 }
 

@@ -13,7 +13,7 @@ const theme = {
     },
     primary: {
       green: '#1B4E2B',
-      orange: '#E09D4E'
+      orange: '#E09D4E',
     },
     secondary: {
       blue: '#00A5FF',
@@ -21,7 +21,7 @@ const theme = {
       yellow: '#FFCE00',
       orange: '#f9791b',
       purple: '#7b11f1',
-      wine: '#870423'
+      wine: '#870423',
     },
     text: {
       default: '#393939',
@@ -41,7 +41,7 @@ const theme = {
       android: 42,
       iOS: 42,
     },
-  }
-};
+  },
+}
 
-export default theme;
+export default theme

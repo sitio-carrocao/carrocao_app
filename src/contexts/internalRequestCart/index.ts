@@ -1,7 +1,7 @@
-import { use } from 'react'
-
 import type IProduct from '@models/Product'
 import type { IInternalRequestCart } from '@models/Product'
+import { use } from 'react'
+
 import { InternalRequestCartContext } from './provider'
 
 interface IUseInternalRequestCart {
@@ -10,6 +10,7 @@ interface IUseInternalRequestCart {
   removeProduct: (id: number) => void
   updateQuantity: (id: number, quantity: number) => void
   addProduct: (product: IProduct) => void
+  isLoading: boolean
 }
 
 function useInternalRequestCart(): IUseInternalRequestCart {

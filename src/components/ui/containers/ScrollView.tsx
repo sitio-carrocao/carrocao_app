@@ -1,14 +1,12 @@
-import React, { type PropsWithChildren } from 'react'
-
+import theme from '@constants/themes'
+import { type PropsWithChildren } from 'react'
 import {
-  ScrollView as ScrollViewNative,
   type ScrollViewProps,
   type StyleProp,
   StyleSheet,
   type ViewStyle,
 } from 'react-native'
-
-import theme from '@constants/themes'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 interface IProps extends ScrollViewProps, PropsWithChildren {
   style?: StyleProp<
@@ -19,19 +17,20 @@ interface IProps extends ScrollViewProps, PropsWithChildren {
       | 'paddingHorizontal'
       | 'backgroundColor'
       | 'padding'
+      | 'rowGap'
     >
   >
 }
 
-function ScrollView({ children, style, ...props }: IProps) {
+export default function ScrollView({ children, style, ...props }: IProps) {
   return (
-    <ScrollViewNative
+    <KeyboardAwareScrollView
       {...props}
       contentContainerStyle={[styles.scroll, style]}
       removeClippedSubviews={false}
       showsVerticalScrollIndicator>
       {children}
-    </ScrollViewNative>
+    </KeyboardAwareScrollView>
   )
 }
 
@@ -42,5 +41,3 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.general,
   },
 })
-
-export default ScrollView
