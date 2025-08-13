@@ -7,6 +7,7 @@ import ImageService from '@services/image/ImageService'
 import { HttpStatusCode } from 'axios'
 import { Platform } from 'react-native'
 
+import type IAttachAdminToValidatedInputData from './dtos/attachAdminToValidated/InputData'
 import type ICreateExternalRequestInputData from './dtos/createExternalRequest/InputData'
 import type ICreateInternalRequestInputData from './dtos/createInternalRequest/InputData'
 import type ICreateProductStockInputData from './dtos/createProductStock/InputData'
@@ -23,6 +24,7 @@ import type IGetInternalRequestDetailsOutputData from './dtos/getInternalRequest
 import type IGetStockRequestDetailsInputData from './dtos/getStockRequestDetails/InputData'
 import type IGetStockRequestDetailsOutputData from './dtos/getStockRequestDetails/OutputData'
 import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProductDetails/OutputData'
+import type IGetValidatedProductsOutputData from './dtos/getValidatedProducts/OutputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
 import type IStockRepository from './IStockRepository'
@@ -152,6 +154,30 @@ interface IGetInternalRequestDetailsResponse {
     }
   }[]
   status: EInternalRequestStatus
+}
+
+interface IGetValidatedProductsResponse {
+  list: {
+    admin: {
+      name: string | null
+    }
+    alreadyRegistered: boolean
+    barcode: string
+    description: string
+    id: number
+    quantity: number
+    status: EValidatedProductsStatus
+    suggestedAddress: {
+      column: string
+      deposit: string
+      description: string
+      id: number
+      level: string
+      street: string
+    } | null
+    validationDate: Date
+    value: number
+  }[]
 }
 
 interface IGetValidatedProductDetailsResponse {
@@ -456,9 +482,37 @@ class StockService implements IStockRepository {
     return output
   }
 
+  public async getValidatedProducts(): Promise<IGetValidatedProductsOutputData> {
+    const response = await HttpClient.get<IGetValidatedProductsResponse>({
+      path: `app/stock/validated-products`,
+    })
+    const output: IGetValidatedProductsOutputData = {
+      list: response.data.list.map(item => ({
+        admin: { name: item.admin.name },
+        alreadyRegistered: item.alreadyRegistered,
+        barcode: item.barcode,
+        description: item.description,
+        id: item.id,
+        quantity: item.quantity,
+        suggestedAddress: item.suggestedAddress
+          ? {
+              column: item.suggestedAddress.column,
+              deposit: item.suggestedAddress.deposit,
+              id: item.suggestedAddress.id,
+              level: item.suggestedAddress.level,
+            }
+          : null,
+        status: item.status,
+        value: item.value,
+        validationDate: item.validationDate,
+      })),
+    }
+    return output
+  }
+
   public async getValidatedProductDetails(): Promise<IGetValidatedProductDetailsOutputData> {
     const response = await HttpClient.get<IGetValidatedProductDetailsResponse>({
-      path: `app/validated-products/admin`,
+      path: `app/stock/validated-products/admin`,
     })
     const output: IGetValidatedProductDetailsOutputData = {
       admin: { name: response.data.admin.name },
@@ -471,10 +525,8 @@ class StockService implements IStockRepository {
         ? {
             column: response.data.suggestedAddress.column,
             deposit: response.data.suggestedAddress.deposit,
-            description: response.data.suggestedAddress.description,
             id: response.data.suggestedAddress.id,
             level: response.data.suggestedAddress.level,
-            street: response.data.suggestedAddress.street,
           }
         : null,
       status: response.data.status,
@@ -482,6 +534,17 @@ class StockService implements IStockRepository {
       value: response.data.value,
     }
     return output
+  }
+
+  public async attachAdminToValidated(
+    inputData: IAttachAdminToValidatedInputData
+  ): Promise<void> {
+    await HttpClient.post<void>({
+      path: `app/stock/validated-products/attach-admin`,
+      body: {
+        id: inputData.id,
+      },
+    })
   }
 
   public async searchByBarcode(

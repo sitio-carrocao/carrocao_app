@@ -85,10 +85,10 @@ export default function ExternalRequestCreateForm() {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      queryClient.resetQueries({
         queryKey: ['externalRequest'],
       })
-      queryClient.invalidateQueries({
+      queryClient.resetQueries({
         queryKey: ['externalRequestDetails'],
       })
       router.dismissTo({

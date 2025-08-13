@@ -63,7 +63,6 @@ export default function TabExternalRequestDetails() {
     },
     queryKey: ['externalRequestDetails', id],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
   const dataParsed = useMemo(() => {

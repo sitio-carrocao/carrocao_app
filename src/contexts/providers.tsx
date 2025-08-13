@@ -19,26 +19,26 @@ import InternalRequestCartProvider from './internalRequestCart/provider'
 import SessionProvider from './session/provider'
 
 function Providers({ children }: PropsWithChildren) {
+  const queryClient = new QueryClient({})
   const colorScheme = useColorScheme()
-  const queryClient = new QueryClient()
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <SessionProvider>
-          <InternalRequestCartProvider>
-            <SafeAreaProvider>
-              <GestureHandlerRootView>
-                <BottomSheetModalProvider>
-                  <KeyboardProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SessionProvider>
+            <InternalRequestCartProvider>
+              <SafeAreaProvider>
+                <KeyboardProvider>
+                  <BottomSheetModalProvider>
                     {children}
                     <Toast config={toast.config} />
-                  </KeyboardProvider>
-                </BottomSheetModalProvider>
-              </GestureHandlerRootView>
-            </SafeAreaProvider>
-          </InternalRequestCartProvider>
-        </SessionProvider>
+                  </BottomSheetModalProvider>
+                </KeyboardProvider>
+              </SafeAreaProvider>
+            </InternalRequestCartProvider>
+          </SessionProvider>
+        </GestureHandlerRootView>
       </ThemeProvider>
     </QueryClientProvider>
   )

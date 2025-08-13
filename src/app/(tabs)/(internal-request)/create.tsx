@@ -49,7 +49,6 @@ export default function TabInternalRequestCreate() {
     },
     queryKey: ['requestProducts', name, page],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
   const handleSubmit = useCallback(

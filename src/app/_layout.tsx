@@ -46,6 +46,10 @@ function RootLayout() {
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="qr-code-camera" />
+      </Stack.Protected>
     </Stack>
   )
 }

@@ -66,7 +66,6 @@ export default function TabExternalRequestInitial() {
     },
     queryKey: ['externalRequest', endDate, startDate, status, page, name],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
   const handleSubmit = useCallback(
@@ -109,7 +108,7 @@ export default function TabExternalRequestInitial() {
   }, [refetch])
 
   return (
-    <View style={styles.container}>
+    <View style={styles.conatiner}>
       <FormProvider {...form}>
         <FlatList<ExternalRequestList>
           ListHeaderComponent={
@@ -170,14 +169,14 @@ export default function TabExternalRequestInitial() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  conatiner: {
     flex: 1,
-    backgroundColor: theme.colors.background.general,
   },
   contentContainer: {
     padding: 16,
     rowGap: 16,
     flexGrow: 1,
+    backgroundColor: theme.colors.background.general,
   },
   headerContainer: {
     backgroundColor: theme.colors.background.general,

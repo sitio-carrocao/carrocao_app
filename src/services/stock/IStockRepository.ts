@@ -1,3 +1,4 @@
+import type IAttachAdminToValidatedInputData from './dtos/attachAdminToValidated/InputData'
 import type ICreateExternalRequest from './dtos/createExternalRequest/InputData'
 import type ICreateInternalRequestInputData from './dtos/createInternalRequest/InputData'
 import type ICreateProductStockInputData from './dtos/createProductStock/InputData'
@@ -14,6 +15,7 @@ import type IGetInternalRequestDetailsOutputData from './dtos/getInternalRequest
 import type IGetStockRequestDetailsInputData from './dtos/getStockRequestDetails/InputData'
 import type IGetStockRequestDetailsOutputData from './dtos/getStockRequestDetails/OutputData'
 import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProductDetails/OutputData'
+import type IGetValidatedProductOutputData from './dtos/getValidatedProducts/OutputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
 
@@ -41,10 +43,14 @@ interface IStockRepository {
   getStockRequestDetails(
     inputData: IGetStockRequestDetailsInputData
   ): Promise<IGetStockRequestDetailsOutputData>
+  getValidatedProducts(): Promise<IGetValidatedProductOutputData>
   getValidatedProductDetails(): Promise<IGetValidatedProductDetailsOutputData>
   searchByBarcode(
     inputData: ISearchByBarcodeInputData
   ): Promise<ISearchByBarcodeOutputData>
+  attachAdminToValidated(
+    inputData: IAttachAdminToValidatedInputData
+  ): Promise<void>
 }
 
 export default IStockRepository

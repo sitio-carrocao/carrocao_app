@@ -32,25 +32,21 @@ export default function QRCodeCamera() {
           const result: {
             column: string
             deposit: string
-            description: string
             id: number
             level: string
-            street: string
           } = JSON.parse(code.value!)
           if (
             !result.column &&
             !result.deposit &&
-            !result.description &&
             !result.id &&
-            !result.level &&
-            !result.street
+            !result.level
           ) {
             throw new Error()
           }
           router.dismissTo({
             pathname: path,
             params: {
-              qrcode: code.value,
+              qrcode: result.id,
             },
           })
           router.setParams({ qrcode: code.value })

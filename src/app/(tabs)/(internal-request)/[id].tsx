@@ -51,7 +51,6 @@ export default function TabInternalRequestDetails() {
     },
     queryKey: ['internalRequestDetails', id],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
   const dataParsed = useMemo(() => {

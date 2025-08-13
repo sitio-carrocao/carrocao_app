@@ -2,18 +2,20 @@ import Button from '@components/ui/Button'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
 import type IGetValidatedProductDetailsOutputData from '@services/stock/dtos/getValidatedProductDetails/OutputData'
-
-import { Link, router } from 'expo-router'
+import { router } from 'expo-router'
 import { useCallback } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 interface IProps {
-  data?: IGetValidatedProductDetailsOutputData | null
+  data?: IGetValidatedProductDetailsOutputData
 }
+
 export default function StockInitialCurrentTask({ data }: IProps) {
   const handleFinishTask = useCallback(() => {
     if (data?.alreadyRegistered) {
-      router.navigate({ pathname: `/(tabs)/(stock)/address` })
+      router.navigate({
+        pathname: `/(tabs)/(stock)/address`,
+      })
     } else {
       router.navigate({ pathname: `/(tabs)/(stock)/product` })
     }
@@ -65,12 +67,9 @@ export default function StockInitialCurrentTask({ data }: IProps) {
               Endereço sugerido
             </Texts.SemiBold>
             <Texts.Bold style={{ fontSize: 18 }}>
-              {data?.suggestedAddress.description}
-            </Texts.Bold>
-            <Texts.Bold style={{ fontSize: 18 }}>
-              {data?.suggestedAddress.deposit} | {data?.suggestedAddress.column}
-              {' | '}
-              {data?.suggestedAddress.level} | {data?.suggestedAddress.street}
+              {data?.suggestedAddress
+                ? `${data.suggestedAddress.column} | ${data.suggestedAddress.level} ${data.suggestedAddress.deposit ? '| ' + data.suggestedAddress.deposit : ''}`
+                : 'Não informado'}
             </Texts.Bold>
           </View>
         )}
@@ -83,7 +82,7 @@ export default function StockInitialCurrentTask({ data }: IProps) {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    marginBottom: 32,
+    marginVertical: 16,
   },
   container: {
     borderWidth: 1.5,

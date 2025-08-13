@@ -20,15 +20,15 @@ export default function StockLayout() {
         name="index"
         options={{
           title: 'Armazenar estoque',
-          headerRight: ({ tintColor }) => (
-            <Link asChild href="/(tabs)/(stock)/create">
-              <TouchableOpacity
-                activeOpacity={theme.button.activeOpacity}
-                hitSlop={10}>
-                <CirclePlus color={tintColor} strokeWidth={1.5} size={30} />
-              </TouchableOpacity>
-            </Link>
-          ),
+          // headerRight: ({ tintColor }) => (
+          //   <Link asChild href="/(tabs)/(stock)/create">
+          //     <TouchableOpacity
+          //       activeOpacity={theme.button.activeOpacity}
+          //       hitSlop={10}>
+          //       <CirclePlus color={tintColor} strokeWidth={1.5} size={30} />
+          //     </TouchableOpacity>
+          //   </Link>
+          // ),
         }}
       />
       <Stack.Screen

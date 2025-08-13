@@ -1,4 +1,5 @@
 import theme from '@constants/themes'
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import {
   type JSX,
   type Ref,
@@ -11,7 +12,7 @@ import {
   Platform,
   type StyleProp,
   StyleSheet,
-  TextInput,
+  type TextInput,
   type TextInputFocusEventData,
   type TextInputProps,
   type TextStyle,
@@ -41,7 +42,7 @@ interface IProps {
   label?: string
 }
 
-function InputRoot({
+function InputBottomSheet({
   containerStyle = {},
   fieldStyle = {},
   inputStyle = {},
@@ -117,7 +118,7 @@ function InputRoot({
           </View>
         )}
 
-        <TextInput
+        <BottomSheetTextInput
           {...inputProps}
           autoComplete="off"
           autoCorrect={false}
@@ -125,9 +126,7 @@ function InputRoot({
           textAlignVertical="top"
           onChangeText={handleChangeText}
           onFocus={handleFocus}
-          verticalAlign="top"
           placeholderTextColor={theme.colors.text.default}
-          ref={inputRef}
           selectionColor={theme.colors.text.default}
           style={[styles.input, inputStyle]}
         />
@@ -191,4 +190,4 @@ const styles = StyleSheet.create({
 })
 
 export type { IProps as Props, IRefProps as RefProps }
-export default InputRoot
+export default InputBottomSheet

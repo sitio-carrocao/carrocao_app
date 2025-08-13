@@ -62,7 +62,6 @@ export default function TabInternalRequestInitial() {
     },
     queryKey: ['internalRequest', endDate, startDate, status, page],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
   const handleSubmit = useCallback(
@@ -102,7 +101,7 @@ export default function TabInternalRequestInitial() {
   }, [refetch])
 
   return (
-    <View style={styles.container}>
+    <View style={styles.conatiner}>
       <FormProvider {...form}>
         <FlatList<InternalRequestList>
           ListHeaderComponent={
@@ -163,14 +162,14 @@ export default function TabInternalRequestInitial() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  conatiner: {
     flex: 1,
-    backgroundColor: theme.colors.background.general,
   },
   contentContainer: {
     padding: 16,
     rowGap: 16,
     flexGrow: 1,
+    backgroundColor: theme.colors.background.general,
   },
   headerContainer: {
     backgroundColor: theme.colors.background.general,

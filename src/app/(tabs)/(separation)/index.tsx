@@ -36,7 +36,6 @@ export default function TabSeparationInitial() {
     },
     queryKey: ['separationTasks'],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
     retryOnMount: false,
   })
 
@@ -51,8 +50,6 @@ export default function TabSeparationInitial() {
     },
     queryKey: ['separationCurrentTask'],
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retryOnMount: false,
   })
 
   const { isPending, mutateAsync } = useMutation({
@@ -65,10 +62,10 @@ export default function TabSeparationInitial() {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      queryClient.resetQueries({
         queryKey: ['separationTasks'],
       })
-      queryClient.invalidateQueries({
+      queryClient.resetQueries({
         queryKey: ['separationCurrentTask'],
       })
     },

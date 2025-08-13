@@ -1,6 +1,6 @@
 import type EValidatedProductsStatus from '@enums/validatedProductStatus'
 
-interface IGetValidatedProductDetailsOutputData {
+interface IValidateProduct {
   admin: {
     name: string | null
   }
@@ -16,8 +16,8 @@ interface IGetValidatedProductDetailsOutputData {
     id: number
     level: string
   } | null
-  unitMeasurement: string
+  validationDate: Date
   value: number
 }
 
-export default IGetValidatedProductDetailsOutputData
+export default IValidateProduct

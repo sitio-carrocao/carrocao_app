@@ -7,7 +7,6 @@ import {
   BottomSheetFlatList,
   BottomSheetModal,
 } from '@gorhom/bottom-sheet'
-import type StockAddress from '@models/StockAddress'
 import {
   type Ref,
   useCallback,
@@ -27,19 +26,21 @@ export interface IRefProps {
 }
 
 interface IProps {
-  onSelect(value: StockAddress): void
-  data: StockAddress[]
+  onSelect(value: string): void
+  data: { label: string; value: string }[]
   ref: Ref<IRefProps>
   error?: string
   value: string
+  label: string
 }
 
-export default function Addresses({
+export default function Select({
   onSelect,
   data,
   ref,
   error,
   value,
+  label,
 }: IProps) {
   const [search, setSearch] = useState<string>('')
   const insets = useSafeAreaInsets()
@@ -60,7 +61,7 @@ export default function Addresses({
   )
 
   const handleSelect = useCallback(
-    (value: StockAddress) => {
+    (value: string) => {
       onSelect(value)
       bottomSheetModalRef.current?.dismiss()
     },
@@ -76,14 +77,12 @@ export default function Addresses({
   }, [])
 
   const currentValue = useMemo(() => {
-    return data.find(item => item.id.toString() === value)
+    return data.find(item => item.value.toString() === value)
   }, [value, data])
 
   const filteredData = useMemo(() => {
     return data.filter(item =>
-      `${item.level} ${item.level}`
-        .toLowerCase()
-        .includes(search.toLocaleLowerCase())
+      item.value.toLowerCase().includes(search.toLocaleLowerCase())
     )
   }, [data, search])
 
@@ -110,7 +109,7 @@ export default function Addresses({
             marginBottom: 4,
             color: theme.colors.primary.green,
           }}>
-          Endereço
+          {label}
         </Texts.SemiBold>
         {error && (
           <Texts.SemiBold
@@ -129,13 +128,12 @@ export default function Addresses({
           error && { borderColor: theme.colors.utils.danger },
         ]}>
         <Texts.SemiBold style={[!value && { color: '#888888' }]}>
-          {currentValue
-            ? `${currentValue.column} | ${currentValue.level} ${currentValue.deposit ? '| ' + currentValue.deposit : ''}`
-            : 'Selecione'}
+          {currentValue ? currentValue.label : 'Selecione'}
         </Texts.SemiBold>
       </TouchableOpacity>
 
       <BottomSheetModal
+        // handleStyle={{ backgroundColor: theme.colors.background.general }}
         maxDynamicContentSize={Dimensions.get('screen').height / 2}
         bottomInset={insets.bottom}
         backdropComponent={renderBackdrop}
@@ -153,7 +151,7 @@ export default function Addresses({
                   fontSize: 18,
                   color: theme.colors.primary.green,
                 }}>
-                Selecione um endereço
+                Selecione uma opção
               </Texts.SemiBold>
               <Inputs.BottomSheet
                 inputProps={{
@@ -166,15 +164,13 @@ export default function Addresses({
             </View>
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          keyExtractor={item => String(item.id)}
+          keyExtractor={item => String(item.value)}
           renderItem={({ item }) => (
             <TouchableOpacity
               activeOpacity={theme.button.activeOpacity}
-              onPress={() => handleSelect(item)}
+              onPress={() => handleSelect(item.value)}
               style={styles.item}>
-              <Texts.Bold style={{ fontSize: 18 }}>
-                {`${item.column} | ${item.level} ${item.deposit ? '| ' + item.deposit : ''}`}
-              </Texts.Bold>
+              <Texts.Bold style={{ fontSize: 18 }}>{item.label}</Texts.Bold>
             </TouchableOpacity>
           )}
         />
