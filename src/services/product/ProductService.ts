@@ -1,7 +1,10 @@
 import type EProductStockStatus from '@enums/productStockStatus'
 import HttpClient from '@services/core/HttpClient'
+import ImageService from '@services/image/ImageService'
 import { HttpStatusCode } from 'axios'
+import { Platform } from 'react-native'
 
+import type ICreateProductInputData from './dtos/create/InputData'
 import type IGetAllProductsInputData from './dtos/getAllProducts/InputData'
 import type IGetAllProductsOutputData from './dtos/getAllProducts/OutputData'
 import type IProductRepository from './IProductRepository'
@@ -39,6 +42,20 @@ interface IGetAllParams {
   type_product?: string
   type_stock?: string
   unit_measurement?: string
+}
+
+interface ICreateBody {
+  active: boolean
+  barcode: string | null
+  maximum_stock: number
+  minimum_stock: number
+  model: string | null
+  name: string
+  observation: string
+  pictures: string[]
+  type_product_id: number
+  type_stock_id: number
+  unit_measurement_id: number
 }
 
 class ProductService implements IProductRepository {
@@ -88,6 +105,40 @@ class ProductService implements IProductRepository {
       },
     }
     return output
+  }
+
+  public async create(inputData: ICreateProductInputData): Promise<void> {
+    const images = []
+    for await (const image of inputData.images) {
+      const response = await ImageService.uploadImage({
+        file: {
+          uri:
+            Platform.OS === 'ios'
+              ? image.uri.replace('file://', '')
+              : image.uri,
+          name: image.fileName,
+          type: image.mimeType,
+        },
+      })
+      images.push(response.url)
+    }
+    const body: ICreateBody = {
+      active: inputData.active,
+      barcode: inputData.barcode,
+      maximum_stock: inputData.min,
+      minimum_stock: inputData.max,
+      model: inputData.model,
+      name: inputData.name,
+      observation: inputData.observation,
+      pictures: images,
+      type_product_id: inputData.productType,
+      type_stock_id: inputData.stockType,
+      unit_measurement_id: inputData.unitMensuare,
+    }
+    await HttpClient.post<ICreateBody>({
+      path: 'app/products',
+      body,
+    })
   }
 }
 

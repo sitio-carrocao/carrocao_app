@@ -13,8 +13,9 @@ import Texts from '@components/ui/Texts'
 import toast from '@components/ui/toast'
 import theme from '@constants/themes'
 import { zodResolver } from '@hookform/resolvers/zod'
+import ProductService from '@services/product/ProductService'
 import UtilsService from '@services/utils/UtilsService'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { Ellipsis, ImagePlus } from 'lucide-react-native'
@@ -57,6 +58,7 @@ const formSchema = z.object({
 })
 
 export default function TabStockProduc() {
+  const queryClient = useQueryClient()
   const barcodeRef = useRef<RootRefProps>(null)
   const modelRef = useRef<RootRefProps>(null)
   const minRef = useRef<RootRefProps>(null)
@@ -81,6 +83,33 @@ export default function TabStockProduc() {
       productType: '',
       stockType: '',
       unitMensuare: '',
+    },
+  })
+
+  const { isPending, mutateAsync } = useMutation({
+    mutationFn: ProductService.create,
+    onError: () => {
+      toast.show({
+        message: 'Não foi possível realizar a operação, tente novamente',
+        title: 'ATENÇÃO',
+        type: 'error',
+      })
+    },
+    onSuccess: () => {
+      queryClient.resetQueries({
+        queryKey: ['validatedProducts'],
+      })
+      queryClient.resetQueries({
+        queryKey: ['validatedProductDetails'],
+      })
+      router.dismissTo({
+        pathname: '/(tabs)/(stock)',
+      })
+      toast.show({
+        message: 'Produto registrado com sucesso',
+        title: 'Parabéns',
+        type: 'success',
+      })
     },
   })
 
@@ -180,6 +209,29 @@ export default function TabStockProduc() {
   const handleFocusMaxInput = useCallback(() => {
     maxRef.current?.focus()
   }, [])
+
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>): Promise<void> => {
+      await mutateAsync({
+        active: true,
+        barcode: values.barcode,
+        max: Number(values.max),
+        min: Number(values.min),
+        productType: Number(values.productType),
+        stockType: Number(values.stockType),
+        unitMensuare: Number(values.unitMensuare),
+        observation: values.observation,
+        model: values.model,
+        name: values.name,
+        images: images.map(item => ({
+          fileName: item.fileName!,
+          uri: item.uri,
+          mimeType: item.mimeType!,
+        })),
+      })
+    },
+    [mutateAsync, images]
+  )
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
@@ -421,9 +473,9 @@ export default function TabStockProduc() {
 
       <Button
         label="Confirmar"
-        // disabled={isPending}
-        // isPending={isPending}
-        // onHandle={form.handleSubmit(onSubmit)}
+        disabled={isPending}
+        isPending={isPending}
+        onHandle={form.handleSubmit(onSubmit)}
       />
 
       <AddImage

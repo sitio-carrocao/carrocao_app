@@ -1,6 +1,6 @@
 import { MMKV } from 'react-native-mmkv'
 
 export const storage = new MMKV({
-  id: 'guicheweb-storage',
+  id: 'carrocao-storage',
   encryptionKey: 'EncrypTedKey123',
 })
