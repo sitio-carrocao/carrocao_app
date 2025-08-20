@@ -89,7 +89,6 @@ export default function StockInitialItem({ item, disableButton }: IProps) {
 }
 
 const styles = StyleSheet.create({
-  button: {},
   container: {
     rowGap: 8,
     borderWidth: 1.5,

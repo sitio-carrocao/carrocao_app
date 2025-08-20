@@ -1,15 +1,14 @@
 import Button from '@components/ui/Button'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
-import type IGetStockRequestDetailsOutputData from '@services/stock/dtos/getStockRequestDetails/OutputData'
+import type IStockRequestTaskOutputData from '@services/stock/dtos/stockRequestTask/OutputData'
 import { format, parseISO } from 'date-fns'
-
 import { router } from 'expo-router'
 import { useCallback } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 interface IProps {
-  data?: IGetStockRequestDetailsOutputData | null
+  data?: IStockRequestTaskOutputData | null
 }
 export default function SeparationInitialCurrentTask({ data }: IProps) {
   const handleFinishTask = useCallback(() => {

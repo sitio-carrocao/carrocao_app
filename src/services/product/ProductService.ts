@@ -136,7 +136,7 @@ class ProductService implements IProductRepository {
       unit_measurement_id: inputData.unitMensuare,
     }
     await HttpClient.post<ICreateBody>({
-      path: 'app/products',
+      path: `app/stock/register-product/${inputData.id}`,
       body,
     })
   }

@@ -7,7 +7,6 @@ import axios, {
   isAxiosError,
   type RawAxiosRequestHeaders,
 } from 'axios'
-import { router } from 'expo-router'
 
 class HttpClient {
   private readonly instance: AxiosInstance
@@ -22,16 +21,12 @@ class HttpClient {
       },
       error => {
         if (error.response) {
-          console.log('aaaaaaaa', error.response)
           const { status } = error.response
 
           if (status === 401) {
             console.log('logout')
             storage.delete(storageKeys.token)
             this.removeBearerToken()
-            router.replace({
-              pathname: '/(auth)',
-            })
           }
 
           return Promise.reject(error)

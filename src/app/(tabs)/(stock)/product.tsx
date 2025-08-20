@@ -14,6 +14,7 @@ import toast from '@components/ui/toast'
 import theme from '@constants/themes'
 import { zodResolver } from '@hookform/resolvers/zod'
 import ProductService from '@services/product/ProductService'
+import StockService from '@services/stock/StockService'
 import UtilsService from '@services/utils/UtilsService'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ImagePicker from 'expo-image-picker'
@@ -41,10 +42,10 @@ const formSchema = z.object({
   model: z.string(),
   observation: z.string(),
   min: z.string().min(1, {
-    message: 'O campo é obrigatório',
+    message: '*',
   }),
   max: z.string().min(1, {
-    message: 'O campo é obrigatório',
+    message: '*',
   }),
   productType: z.string().min(1, {
     message: 'O campo é obrigatório',
@@ -71,18 +72,28 @@ export default function TabStockProduc() {
 
   const [status, requestPermission] = ImagePicker.useCameraPermissions()
 
+  const { data: details } = useQuery({
+    queryFn: async () => {
+      const response = await StockService.getValidatedProductDetails()
+      return response
+    },
+    queryKey: ['validatedProductDetails'],
+    refetchOnWindowFocus: false,
+  })
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     reValidateMode: 'onBlur',
     defaultValues: {
-      name: '',
-      barcode: '',
+      name: details?.description || '',
+      barcode: details?.barcode || '',
       max: '',
       min: '',
       model: '',
       productType: '',
       stockType: '',
-      unitMensuare: '',
+      unitMensuare: details?.unitMeasurement || '',
+      observation: '',
     },
   })
 
@@ -134,6 +145,13 @@ export default function TabStockProduc() {
   const { data: unitMeasurements } = useQuery({
     queryFn: async () => {
       const response = await UtilsService.getAllUnitMeasurements()
+      const option = response.list.find(
+        item =>
+          item.name.toLowerCase() === details?.unitMeasurement.toLowerCase()
+      )
+      if (option) {
+        form.setValue('unitMensuare', option.id.toString())
+      }
       return response
     },
     queryKey: ['unitMeasurements'],
@@ -228,9 +246,10 @@ export default function TabStockProduc() {
           uri: item.uri,
           mimeType: item.mimeType!,
         })),
+        id: details!.id,
       })
     },
-    [mutateAsync, images]
+    [mutateAsync, images, details]
   )
 
   return (

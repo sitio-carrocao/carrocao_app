@@ -88,7 +88,7 @@ export default function TabStockInitial() {
             <View style={styles.emptyContainer}>
               <Image style={styles.emptyImage} source={EmptyList} />
               <Texts.Bold style={{ fontSize: 18, marginTop: 24 }}>
-                Nenhuma tarefa encontrada{' '}
+                Nenhuma tarefa encontrada
               </Texts.Bold>
             </View>
           )

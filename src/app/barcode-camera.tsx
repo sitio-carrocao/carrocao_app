@@ -14,10 +14,9 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera'
 
-export default function QRCodeCamera() {
-  const { path, addressId, productId } = useLocalSearchParams<{
+export default function BarcodeCamera() {
+  const { path, productId } = useLocalSearchParams<{
     path: RelativePathString
-    addressId?: string
     productId?: string
   }>()
 
@@ -28,31 +27,19 @@ export default function QRCodeCamera() {
   const [isActive, setIsActive] = useState<boolean>(true)
 
   const codeScanner = useCodeScanner({
-    codeTypes: ['qr'],
+    codeTypes: ['ean-13'],
     onCodeScanned: codes => {
       for (const code of codes) {
         setIsScanning(false)
         setIsActive(false)
         try {
-          const result: {
-            column: string
-            deposit: string
-            id: number
-            level: string
-          } = JSON.parse(code.value!)
-          if (
-            !result.column &&
-            !result.deposit &&
-            !result.id &&
-            !result.level
-          ) {
+          if (!code.value) {
             throw new Error()
           }
           router.dismissTo({
             pathname: path,
             params: {
-              qrcode: result.id,
-              addressId,
+              barcode: code.value,
               productId,
             },
           })
@@ -60,7 +47,7 @@ export default function QRCodeCamera() {
           router.back()
           toast.show({
             title: 'ATENÇÃO',
-            message: 'QR Code inválido',
+            message: 'Código inválido',
             type: 'error',
           })
         }
@@ -71,18 +58,9 @@ export default function QRCodeCamera() {
   return (
     <View style={styles.container}>
       {hasPermission ? (
-        <>
+        <View>
           {device && (
             <View style={styles.cameraContainer}>
-              <View
-                style={[
-                  styles.absoluteContainer,
-                  styles.verticalContainer,
-                  {
-                    top: 0,
-                  },
-                ]}
-              />
               <View
                 style={[
                   styles.absoluteContainer,
@@ -109,18 +87,9 @@ export default function QRCodeCamera() {
                   },
                 ]}
               />
-              <View
-                style={[
-                  styles.absoluteContainer,
-                  styles.verticalContainer,
-                  {
-                    bottom: 0,
-                  },
-                ]}
-              />
             </View>
           )}
-        </>
+        </View>
       ) : (
         <View style={styles.permissionContainer}>
           <LottieView
@@ -168,12 +137,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000BF',
   },
   horizontalContainer: {
-    width: '15%',
-    height: '40%',
-    top: '30%',
-  },
-  verticalContainer: {
-    width: '100%',
-    height: '30%',
+    width: '30%',
+    height: '100%',
+    top: 0,
   },
 })

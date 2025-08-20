@@ -14,6 +14,7 @@ interface ICreateProductInputData {
   productType: number
   stockType: number
   unitMensuare: number
+  id: number
 }
 
 export default ICreateProductInputData

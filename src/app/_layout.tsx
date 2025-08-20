@@ -1,8 +1,9 @@
 import Providers from '@contexts/providers'
 import useSession from '@contexts/session'
-import { Stack } from 'expo-router'
+import { router, Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
+import { useEffect } from 'react'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -31,13 +32,17 @@ function SplashScreenController() {
 }
 
 function RootLayout() {
-  const { session } = useSession()
+  const { session, isLoading } = useSession()
+
+  useEffect(() => {
+    if (!session && !isLoading) {
+      router.replace({
+        pathname: '/(auth)',
+      })
+    }
+  }, [session, isLoading])
 
   return (
-    // {/* <SafeAreaView
-    //   edges={['top']}
-    //   style={{ flex: 0, backgroundColor: theme.colors.background.general }}
-    // /> */}
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="(auth)" />
@@ -49,6 +54,10 @@ function RootLayout() {
 
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="qr-code-camera" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="barcode-camera" />
       </Stack.Protected>
     </Stack>
   )

@@ -8,6 +8,7 @@ import { HttpStatusCode } from 'axios'
 import { Platform } from 'react-native'
 
 import type IAttachAdminToValidatedInputData from './dtos/attachAdminToValidated/InputData'
+import type IAttachCollaboratorToStockRequestInputData from './dtos/attachCollaboratorToStockRequest/InputData'
 import type ICreateExternalRequestInputData from './dtos/createExternalRequest/InputData'
 import type ICreateInternalRequestInputData from './dtos/createInternalRequest/InputData'
 import type ICreateProductStockInputData from './dtos/createProductStock/InputData'
@@ -27,6 +28,8 @@ import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProdu
 import type IGetValidatedProductsOutputData from './dtos/getValidatedProducts/OutputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
+import type IStockRequestTaskOutputData from './dtos/stockRequestTask/OutputData'
+import type IWaitingWithdrawRequestProductInputData from './dtos/waitingWithdrawRequestProduct/InputData'
 import type IStockRepository from './IStockRepository'
 
 interface ICreateExternalRequestBodyRequest {
@@ -209,6 +212,50 @@ interface ISearchByBarcodeResponse {
   minimum_stock: number | null
   name: string
   unit_measurement: string
+}
+
+interface IStockRequestTaskResponse {
+  admin: {
+    id: number
+    name: string
+  }
+  date: string
+  id: number
+  products: {
+    addresses: {
+      address: {
+        column: string | null
+        deposit: string
+        description: string | null
+        id: number
+        level: string | null
+        street: string | null
+      }
+      batch: string | null
+      dueDate: Date | null
+      id: number
+      isBestOption: boolean
+      name: string
+      quantity: string
+    }[]
+    barcode: string | null
+    id: number
+    name: string
+    picture: string[]
+    productId: number
+    quantity: number
+    status: EInternalRequestProductsStatus
+    typeProduct: {
+      name: string
+    }
+    typeStock: {
+      name: string
+    }
+    unitMeasurement: {
+      name: string
+    }
+  }[]
+  status: EInternalRequestStatus
 }
 
 class StockService implements IStockRepository {
@@ -562,6 +609,54 @@ class StockService implements IStockRepository {
       unitMeasurement: response.data.unit_measurement,
     }
     return output
+  }
+
+  public async attachCollaboratorToStockRequest(
+    inputData: IAttachCollaboratorToStockRequestInputData
+  ): Promise<void> {
+    await HttpClient.post({
+      path: `app/stock/requests/attach-collaborator`,
+      body: {
+        id: inputData.id,
+      },
+    })
+  }
+
+  public async stockRequestVerifyTask(): Promise<IStockRequestTaskOutputData> {
+    const response = await HttpClient.get<IStockRequestTaskResponse>({
+      path: `app/stock/requests/collaborator-verify`,
+    })
+    const output: IStockRequestTaskOutputData = {
+      admin: {
+        id: response.data.admin.id,
+        name: response.data.admin.name,
+      },
+      date: response.data.date,
+      id: response.data.id,
+      products: response.data.products.map(item => ({
+        addresses: item.addresses,
+        barcode: item.barcode,
+        id: item.id,
+        name: item.name,
+        picture: item.picture,
+        productId: item.productId,
+        quantity: item.quantity,
+        status: item.status,
+        typeProduct: item.typeProduct,
+        typeStock: item.typeStock,
+        unitMeasurement: item.unitMeasurement,
+      })),
+      status: response.data.status,
+    }
+    return output
+  }
+
+  public async waitingWithdrawRequestProduct(
+    inputData: IWaitingWithdrawRequestProductInputData
+  ): Promise<void> {
+    await HttpClient.post({
+      path: `app/stock/requests/${inputData.id}/waiting-withdraw`,
+    })
   }
 }
 

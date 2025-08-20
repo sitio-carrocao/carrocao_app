@@ -1,4 +1,5 @@
 import type IAttachAdminToValidatedInputData from './dtos/attachAdminToValidated/InputData'
+import type IAttachCollaboratorToStockRequestInputData from './dtos/attachCollaboratorToStockRequest/InputData'
 import type ICreateExternalRequest from './dtos/createExternalRequest/InputData'
 import type ICreateInternalRequestInputData from './dtos/createInternalRequest/InputData'
 import type ICreateProductStockInputData from './dtos/createProductStock/InputData'
@@ -18,6 +19,8 @@ import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProdu
 import type IGetValidatedProductOutputData from './dtos/getValidatedProducts/OutputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
+import type IStockRequestTaskOutputData from './dtos/stockRequestTask/OutputData'
+import type IWaitingWithdrawRequestProductInputData from './dtos/waitingWithdrawRequestProduct/InputData'
 
 interface IStockRepository {
   createExternalRequest(inputData: ICreateExternalRequest): Promise<void>
@@ -50,6 +53,13 @@ interface IStockRepository {
   ): Promise<ISearchByBarcodeOutputData>
   attachAdminToValidated(
     inputData: IAttachAdminToValidatedInputData
+  ): Promise<void>
+  attachCollaboratorToStockRequest(
+    inputData: IAttachCollaboratorToStockRequestInputData
+  ): Promise<void>
+  stockRequestVerifyTask(): Promise<IStockRequestTaskOutputData>
+  waitingWithdrawRequestProduct(
+    inputData: IWaitingWithdrawRequestProductInputData
   ): Promise<void>
 }
 
