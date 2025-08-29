@@ -2,36 +2,19 @@ import EmptyBox from '@assets/empty-box.png'
 import InternalRequestCartItem from '@components/pages/tabs/internal-request/cart/Item'
 import Button from '@components/ui/Button'
 import Containers from '@components/ui/containers'
-import Inputs from '@components/ui/inputs'
 import Texts from '@components/ui/Texts'
 import toast from '@components/ui/toast'
 import theme from '@constants/themes'
 import useInternalRequestCart from '@contexts/internalRequestCart'
-import { zodResolver } from '@hookform/resolvers/zod'
 import StockService from '@services/stock/StockService'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useCallback } from 'react'
-import { Controller, useForm } from 'react-hook-form'
 import { Image, StyleSheet, View } from 'react-native'
-import { z } from 'zod'
-
-const formSchema = z.object({
-  whereUsed: z.string().min(1, {
-    message: 'O campo é obrigatório',
-  }),
-})
 
 export default function TabInternalRequestCart() {
+  const queryClient = useQueryClient()
   const { products, removeAll } = useInternalRequestCart()
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    reValidateMode: 'onBlur',
-    defaultValues: {
-      whereUsed: '',
-    },
-  })
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: StockService.createInternalRequest,
@@ -42,7 +25,10 @@ export default function TabInternalRequestCart() {
         type: 'error',
       })
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.resetQueries({
+        queryKey: ['internalRequest'],
+      })
       router.dismissTo({
         pathname: '/(tabs)/(internal-request)',
       })
@@ -55,18 +41,15 @@ export default function TabInternalRequestCart() {
     },
   })
 
-  const onSubmit = useCallback(
-    async (values: z.infer<typeof formSchema>): Promise<void> => {
-      await mutateAsync({
-        products: products.map(item => ({
-          id: item.id,
-          quantity: item.quantitySelected,
-        })),
-        whereUsed: values.whereUsed,
-      })
-    },
-    [mutateAsync, products]
-  )
+  const onSubmit = useCallback(async (): Promise<void> => {
+    await mutateAsync({
+      products: products.map(item => ({
+        id: item.id,
+        quantity: item.quantitySelected,
+        cost_center_id: item.reason.id,
+      })),
+    })
+  }, [mutateAsync, products])
 
   return (
     <View style={styles.container}>
@@ -83,38 +66,16 @@ export default function TabInternalRequestCart() {
             </Texts.Bold>
           </View>
         )}
-        <View style={styles.footerContainer}>
-          <Controller
-            control={form.control}
-            name="whereUsed"
-            render={({ field: { onBlur, onChange, value }, fieldState }) => (
-              <Inputs.Root
-                label="Onde será utilizado"
-                error={fieldState.error?.message}
-                inputStyle={{ height: 100 }}
-                inputProps={{
-                  numberOfLines: 3,
-                  multiline: true,
-                  autoComplete: 'off',
-                  autoCorrect: false,
-                  onSubmitEditing: form.handleSubmit(onSubmit),
-                  returnKeyType: 'next',
-                  submitBehavior: 'newline',
-                  onBlur,
-                  onChangeText: onChange,
-                  value,
-                }}
-              />
-            )}
-          />
-
-          <Button
-            label="Solicitar produtos"
-            disabled={isPending}
-            isPending={isPending}
-            onHandle={form.handleSubmit(onSubmit)}
-          />
-        </View>
+        {!!products.length && (
+          <View style={styles.footerContainer}>
+            <Button
+              label="Solicitar produtos"
+              disabled={isPending}
+              isPending={isPending}
+              onHandle={onSubmit}
+            />
+          </View>
+        )}
       </Containers.Scroll>
     </View>
   )

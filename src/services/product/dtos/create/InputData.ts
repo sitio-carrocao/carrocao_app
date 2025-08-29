@@ -6,6 +6,7 @@ interface ICreateProductInputData {
   model: string | null
   name: string
   observation: string
+  suggestedAddress: string
   images: {
     uri: string
     fileName: string

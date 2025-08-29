@@ -1,41 +1,48 @@
-import Addresses, {
-  type IRefProps as AddressRef,
-} from '@components/pages/tabs/stock/address/Addresses'
 import Button from '@components/ui/Button'
 import Inputs from '@components/ui/inputs'
 import Texts from '@components/ui/Texts'
 import toast from '@components/ui/toast'
 import theme from '@constants/themes'
+import useStock from '@contexts/stock'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import StockService from '@services/stock/StockService'
-import StockAddressService from '@services/stockAddress/StockAddressService'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { format, parseISO } from 'date-fns'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ScanQrCode } from 'lucide-react-native'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { z } from 'zod'
 
-const formSchema = z.object({
-  address: z.string().min(1, {
-    message: 'O campo é obrigatório',
-  }),
-  expirationDate: z.string(),
-  batch: z.string().min(1, {
-    message: 'O campo é obrigatório',
-  }),
-})
-
 export default function TabStockAddress() {
-  const queryClient = useQueryClient()
+  const { onLoadCurrentTask, onLoadTasks, currentTask, addresses } = useStock()
+
+  const formSchema = z
+    .object({
+      address: z.string().min(1, {
+        message: 'O campo é obrigatório',
+      }),
+      expirationDate: z.string(),
+      batch: z.string().min(1, {
+        message: 'O campo é obrigatório',
+      }),
+    })
+    .superRefine((val, ctx) => {
+      if (currentTask?.validateDateRequired && !val.expirationDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'O campo é obrigatório',
+          path: ['expirationDate'],
+        })
+      }
+    })
+
   const { qrcode } = useLocalSearchParams<{
     qrcode?: string
   }>()
-  const addressRef = useRef<AddressRef>(null)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     reValidateMode: 'onBlur',
@@ -51,31 +58,15 @@ export default function TabStockAddress() {
       value: parseISO(form.getValues('expirationDate')),
       onChange: (_, date) => {
         if (date) {
-          form.setValue('expirationDate', format(date, 'yyyy-MM-dd'))
+          form.setValue('expirationDate', format(date, 'yyyy-MM-dd'), {
+            shouldValidate: true,
+          })
         }
       },
       minimumDate: new Date(),
       mode: 'date',
     })
   }
-
-  const { data } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.getValidatedProductDetails()
-      return response
-    },
-    queryKey: ['validatedProductDetails'],
-    refetchOnWindowFocus: false,
-  })
-
-  const { data: addresses } = useQuery({
-    queryFn: async () => {
-      const response = await StockAddressService.getAll({})
-      return response
-    },
-    queryKey: ['stockAddresses'],
-    refetchOnWindowFocus: false,
-  })
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: StockService.createProductStock,
@@ -86,13 +77,7 @@ export default function TabStockAddress() {
         type: 'error',
       })
     },
-    onSuccess: () => {
-      queryClient.resetQueries({
-        queryKey: ['validatedProducts'],
-      })
-      queryClient.resetQueries({
-        queryKey: ['validatedProductDetails'],
-      })
+    onSuccess: async () => {
       router.dismissTo({
         pathname: '/(tabs)/(stock)',
       })
@@ -101,6 +86,8 @@ export default function TabStockAddress() {
         title: 'Parabéns',
         type: 'success',
       })
+      await onLoadCurrentTask()
+      await onLoadTasks()
     },
   })
 
@@ -108,13 +95,13 @@ export default function TabStockAddress() {
     async (values: z.infer<typeof formSchema>): Promise<void> => {
       await mutateAsync({
         batch: values.batch,
-        id: data!.id,
+        id: currentTask!.id,
         productExpirationDate: values.expirationDate || null,
         stockAddressId: Number(values.address),
-        value: data!.value,
+        value: currentTask!.value,
       })
     },
-    [mutateAsync, data]
+    [mutateAsync, currentTask]
   )
 
   useEffect(() => {
@@ -123,13 +110,23 @@ export default function TabStockAddress() {
     }
   }, [qrcode, form])
 
+  const address = useMemo(() => {
+    if (qrcode) {
+      const findAddress = addresses.find(item => item.id === Number(qrcode))
+      return `${findAddress?.column} | ${findAddress?.level} ${findAddress?.deposit ? '| ' + findAddress.deposit : ''}`
+    }
+    return ''
+  }, [qrcode, addresses])
+
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <View>
         <Texts.SemiBold style={{ color: theme.colors.primary.green }}>
           Descrição
         </Texts.SemiBold>
-        <Texts.Bold style={{ fontSize: 18 }}>{data?.description}</Texts.Bold>
+        <Texts.Bold style={{ fontSize: 18 }}>
+          {currentTask?.description}
+        </Texts.Bold>
       </View>
 
       <View style={styles.rowContainer}>
@@ -138,7 +135,7 @@ export default function TabStockAddress() {
             Quantidade
           </Texts.SemiBold>
           <Texts.Bold style={{ fontSize: 18 }}>
-            {data?.quantity} {data?.unitMeasurement}
+            {currentTask?.quantity} {currentTask?.unitMeasurement}
           </Texts.Bold>
         </View>
 
@@ -146,7 +143,9 @@ export default function TabStockAddress() {
           <Texts.SemiBold style={{ color: theme.colors.primary.green }}>
             Código de barra
           </Texts.SemiBold>
-          <Texts.Bold style={{ fontSize: 18 }}>{data?.barcode}</Texts.Bold>
+          <Texts.Bold style={{ fontSize: 18 }}>
+            {currentTask?.barcode}
+          </Texts.Bold>
         </View>
       </View>
 
@@ -155,9 +154,9 @@ export default function TabStockAddress() {
           Endereço sugerido
         </Texts.SemiBold>
         <Texts.Bold style={{ fontSize: 18 }}>
-          {data?.suggestedAddress
-            ? `${data.suggestedAddress.column} | ${data.suggestedAddress.level} ${data.suggestedAddress.deposit ? '| ' + data.suggestedAddress.deposit : ''}`
-            : 'Não informado'}
+          {currentTask?.suggestedAddress
+            ? `${currentTask.suggestedAddress.column} | ${currentTask.suggestedAddress.level} ${currentTask.suggestedAddress.deposit ? '| ' + currentTask.suggestedAddress.deposit : ''}`
+            : currentTask?.adminSuggestedAddress}
         </Texts.Bold>
       </View>
 
@@ -169,14 +168,19 @@ export default function TabStockAddress() {
           control={form.control}
           name="address"
           render={({ field: { value, onChange, onBlur }, fieldState }) => (
-            <Addresses
+            <Inputs.Root
+              containerStyle={{ flex: 1 }}
+              label="Endereço"
               error={fieldState.error?.message}
-              value={value}
-              ref={addressRef}
-              data={addresses?.list || []}
-              onSelect={({ id }) => {
-                onChange(id.toString())
-                onBlur()
+              inputProps={{
+                editable: false,
+                autoCapitalize: 'none',
+                keyboardType: 'numeric',
+                returnKeyType: 'done',
+                submitBehavior: 'submit',
+                onBlur,
+                onChangeText: onChange,
+                value: address,
               }}
             />
           )}
@@ -219,19 +223,35 @@ export default function TabStockAddress() {
       <Controller
         control={form.control}
         name="expirationDate"
-        render={({ field: { value } }) => (
+        render={({ field: { value }, fieldState }) => (
           <View>
-            <Texts.SemiBold
-              style={{
-                marginBottom: 4,
-                color: theme.colors.primary.green,
-              }}>
-              Data de validade
-            </Texts.SemiBold>
+            <View
+              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Texts.SemiBold
+                style={{
+                  marginBottom: 4,
+                  color: theme.colors.primary.green,
+                }}>
+                Data de validade
+              </Texts.SemiBold>
+
+              <Texts.SemiBold
+                style={{
+                  color: theme.colors.utils.danger,
+                }}>
+                {fieldState.error?.message}
+              </Texts.SemiBold>
+            </View>
+
             <TouchableOpacity
               onPress={handleShowDatepicker}
               activeOpacity={theme.button.activeOpacity}
-              style={styles.options}>
+              style={[
+                styles.options,
+                fieldState.error?.message && {
+                  borderColor: theme.colors.utils.danger,
+                },
+              ]}>
               <Texts.SemiBold>
                 {value ? format(parseISO(value), 'dd/MM/yyyy') : ''}
               </Texts.SemiBold>

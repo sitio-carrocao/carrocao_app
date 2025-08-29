@@ -56,6 +56,7 @@ interface ICreateBody {
   type_product_id: number
   type_stock_id: number
   unit_measurement_id: number
+  suggestedAddress: string
 }
 
 class ProductService implements IProductRepository {
@@ -134,6 +135,7 @@ class ProductService implements IProductRepository {
       type_product_id: inputData.productType,
       type_stock_id: inputData.stockType,
       unit_measurement_id: inputData.unitMensuare,
+      suggestedAddress: inputData.suggestedAddress,
     }
     await HttpClient.post<ICreateBody>({
       path: `app/stock/register-product/${inputData.id}`,

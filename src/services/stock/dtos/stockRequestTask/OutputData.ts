@@ -24,7 +24,6 @@ export interface IProductRequestTask {
   picture: string[]
   productId: number
   quantity: number
-  validateAddress: boolean
   validateProduct: boolean
   status: EInternalRequestProductsStatus
   typeProduct: {

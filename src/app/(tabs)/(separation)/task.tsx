@@ -4,10 +4,10 @@ import toast from '@components/ui/toast'
 import theme from '@constants/themes'
 import useSeparation from '@contexts/separation'
 import StockService from '@services/stock/StockService'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { format, parseISO } from 'date-fns'
 import { router, useLocalSearchParams } from 'expo-router'
-import { CircleCheck } from 'lucide-react-native'
+import { CircleCheck, Printer } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
 import {
   Image,
@@ -18,19 +18,17 @@ import {
 } from 'react-native'
 
 export default function TabSeparationTask() {
-  const queryClient = useQueryClient()
-  const { data, setAddress, setProduct } = useSeparation()
-  const { qrcode, addressId, productId, barcode } = useLocalSearchParams<{
+  const { data, setProduct, clear, onLoadCurrentTask, onLoadTasks } =
+    useSeparation()
+
+  const { productId, barcode, qrcode } = useLocalSearchParams<{
     qrcode?: string
-    addressId?: string
     productId?: string
     barcode?: string
   }>()
 
   const allValidate = useMemo(() => {
-    const allValidate = data?.products.filter(
-      item => !item.validateAddress || !item.validateProduct
-    )
+    const allValidate = data?.products.filter(item => !item.validateProduct)
     if (allValidate?.length) {
       return false
     }
@@ -39,20 +37,15 @@ export default function TabSeparationTask() {
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: StockService.waitingWithdrawRequestProduct,
-    onError: () => {
-      toast.show({
-        message: 'Não foi possível realizar a operação, tente novamente',
-        title: 'ATENÇÃO',
-        type: 'error',
-      })
-    },
-    onSuccess: () => {
-      queryClient.resetQueries({
-        queryKey: ['separationTasks'],
-      })
-      queryClient.resetQueries({
-        queryKey: ['separationCurrentTask'],
-      })
+    // onError: () => {
+    //   toast.show({
+    //     message: 'Não foi possível realizar a operação, tente novamente',
+    //     title: 'ATENÇÃO',
+    //     type: 'error',
+    //   })
+    // },
+    onSuccess: async () => {
+      clear()
       router.dismissTo({
         pathname: '/(tabs)/(separation)',
       })
@@ -61,20 +54,24 @@ export default function TabSeparationTask() {
         title: 'Parabéns',
         type: 'success',
       })
+      await onLoadCurrentTask()
+      await onLoadTasks()
     },
   })
 
-  const onSubmit = useCallback(async (): Promise<void> => {
-    await mutateAsync({
-      id: data!.id,
-    })
-  }, [mutateAsync, data])
+  const handlePrintStockrequest = useCallback(async () => {
+    await StockService.printStockRequest({ id: data!.id })
+  }, [data])
 
-  useEffect(() => {
-    if (qrcode && addressId && productId) {
-      setAddress({ qrcode, addressId, productId })
-    }
-  }, [qrcode, addressId, productId, setAddress])
+  const onSubmit = useCallback(
+    async (addressId: string): Promise<void> => {
+      await mutateAsync({
+        id: data!.id,
+        addressId: Number(addressId),
+      })
+    },
+    [mutateAsync, data]
+  )
 
   useEffect(() => {
     if (barcode && productId) {
@@ -82,21 +79,56 @@ export default function TabSeparationTask() {
     }
   }, [productId, barcode, setProduct])
 
+  useEffect(() => {
+    if (qrcode) {
+      onSubmit(qrcode)
+    }
+  }, [qrcode, onSubmit])
+
   return (
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.column}>
-        <Texts.Bold style={{ fontSize: 16 }}>
-          Solicitante: {data?.admin.name}
-        </Texts.Bold>
-        <Texts.Bold style={{ fontSize: 16 }}>
-          Data: {format(parseISO(data!.date), 'dd/MM/yyyy')}
-        </Texts.Bold>
+        <View style={[styles.row, { justifyContent: 'space-between' }]}>
+          <View
+            style={{
+              rowGap: 8,
+            }}>
+            <Texts.Bold style={{ fontSize: 16 }}>
+              Solicitante: {data?.admin.name}
+            </Texts.Bold>
+            <Texts.Bold style={{ fontSize: 16 }}>
+              Data: {data ? format(parseISO(data.date), 'dd/MM/yyyy') : ''}
+            </Texts.Bold>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={theme.button.activeOpacity}
+            style={{
+              backgroundColor: theme.colors.primary.green,
+              padding: 6,
+              borderRadius: 6,
+            }}
+            onPress={handlePrintStockrequest}>
+            <Printer
+              color={theme.colors.background.general}
+              strokeWidth={1.5}
+            />
+          </TouchableOpacity>
+        </View>
 
         <Button
           label="Finalizar"
           disabled={!allValidate}
           isPending={isPending}
-          onHandle={onSubmit}
+          // onHandle={onSubmit}
+          onHandle={() =>
+            router.navigate({
+              pathname: '/qr-code-camera',
+              params: {
+                path: '/(tabs)/(separation)/task',
+              },
+            })
+          }
         />
       </View>
 
@@ -116,27 +148,21 @@ export default function TabSeparationTask() {
               source={{ uri: item.picture[0] }}
             />
             <View style={{ rowGap: 6 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Texts.Bold style={{ color: theme.colors.primary.green }}>
-                    Produto
-                  </Texts.Bold>
-                  <Texts.Bold style={{ fontSize: 16 }}>{item.name}</Texts.Bold>
-                </View>
+              <View>
+                <Texts.Bold style={{ color: theme.colors.primary.green }}>
+                  Produto
+                </Texts.Bold>
+                <Texts.Bold style={{ fontSize: 16 }}>{item.name}</Texts.Bold>
+              </View>
 
-                <View>
-                  <Texts.Bold style={{ color: theme.colors.primary.green }}>
-                    Quantidade
-                  </Texts.Bold>
-                  <Texts.Bold style={{ fontSize: 16 }}>
-                    {item.quantity}{' '}
-                    {item.unitMeasurement.name.toLowerCase() + '(s)'}
-                  </Texts.Bold>
-                </View>
+              <View>
+                <Texts.Bold style={{ color: theme.colors.primary.green }}>
+                  Quantidade
+                </Texts.Bold>
+                <Texts.Bold style={{ fontSize: 16 }}>
+                  {item.quantity}{' '}
+                  {item.unitMeasurement.name.toLowerCase() + '(s)'}
+                </Texts.Bold>
               </View>
 
               <View>
@@ -163,43 +189,6 @@ export default function TabSeparationTask() {
               marginTop: 8,
               justifyContent: 'space-around',
             }}>
-            {!item.validateAddress ? (
-              <TouchableOpacity
-                onPress={() =>
-                  router.navigate({
-                    pathname: '/qr-code-camera',
-                    params: {
-                      path: '/(tabs)/(separation)/task',
-                      addressId: item.addresses[0].address.id.toString(),
-                      productId: item.id.toString(),
-                    },
-                  })
-                }
-                activeOpacity={theme.button.activeOpacity}
-                style={styles.qrCodeButton}>
-                <Texts.SemiBold
-                  style={{
-                    color: theme.colors.background.general,
-                    fontSize: 18,
-                  }}>
-                  Ler endereço
-                </Texts.SemiBold>
-              </TouchableOpacity>
-            ) : (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
-                }}>
-                <CircleCheck color={theme.colors.primary.green} />
-                <Texts.Bold
-                  style={{ color: theme.colors.primary.green, fontSize: 18 }}>
-                  Endereço
-                </Texts.Bold>
-              </View>
-            )}
-
             {!item.validateProduct ? (
               <TouchableOpacity
                 onPress={() =>
@@ -232,7 +221,7 @@ export default function TabSeparationTask() {
                 <CircleCheck color={theme.colors.primary.green} />
                 <Texts.Bold
                   style={{ color: theme.colors.primary.green, fontSize: 18 }}>
-                  Produto
+                  Produto verificado
                 </Texts.Bold>
               </View>
             )}
@@ -276,5 +265,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.button.borderRadius,
+    flex: 1,
   },
 })

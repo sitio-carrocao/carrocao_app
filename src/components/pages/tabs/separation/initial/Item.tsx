@@ -5,7 +5,7 @@ import theme from '@constants/themes'
 import useSeparation from '@contexts/separation'
 import type { InternalRequestList } from '@models/InternalRequest'
 import StockService from '@services/stock/StockService'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { format, parseISO } from 'date-fns'
 import { useCallback } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -16,8 +16,7 @@ interface IProps {
 }
 
 export default function SeparationInitialItem({ item, disableButton }: IProps) {
-  const { handleLoadingSeparation } = useSeparation()
-  const queryClient = useQueryClient()
+  const { onLoadCurrentTask, onLoadTasks } = useSeparation()
 
   const { isPending, mutateAsync, variables } = useMutation({
     mutationFn: StockService.attachCollaboratorToStockRequest,
@@ -29,13 +28,8 @@ export default function SeparationInitialItem({ item, disableButton }: IProps) {
       })
     },
     onSuccess: async () => {
-      await handleLoadingSeparation()
-      queryClient.resetQueries({
-        queryKey: ['separationTasks'],
-      })
-      queryClient.resetQueries({
-        queryKey: ['separationCurrentTask'],
-      })
+      await onLoadCurrentTask()
+      await onLoadTasks()
     },
   })
 

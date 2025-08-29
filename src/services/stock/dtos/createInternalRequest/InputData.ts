@@ -2,8 +2,8 @@ interface ICreateInternalRequestInputData {
   products: {
     id: number
     quantity: number
+    cost_center_id: number
   }[]
-  whereUsed: string
 }
 
 export default ICreateInternalRequestInputData

@@ -84,12 +84,9 @@ export default function ExternalRequestCreateForm() {
         type: 'error',
       })
     },
-    onSuccess: () => {
-      queryClient.resetQueries({
+    onSuccess: async () => {
+      await queryClient.resetQueries({
         queryKey: ['externalRequest'],
-      })
-      queryClient.resetQueries({
-        queryKey: ['externalRequestDetails'],
       })
       router.dismissTo({
         pathname: '/(tabs)/(external-request)',
@@ -130,7 +127,7 @@ export default function ExternalRequestCreateForm() {
       mediaTypes: ['images'],
       allowsEditing: true,
       cameraType: ImagePicker.CameraType.back,
-      quality: 1,
+      quality: 0.4,
     })
     if (!result.canceled) {
       setImages(oldState => {

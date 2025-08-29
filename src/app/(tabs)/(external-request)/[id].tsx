@@ -150,10 +150,6 @@ export default function TabExternalRequestDetails() {
           </View>
 
           <View style={styles.productMainContainer}>
-            {/* <Image
-                  style={styles.productImage}
-                  source={{ uri: item.picture[0] }}
-                /> */}
             <View>
               <Texts.SemiBold style={{ color: theme.colors.primary.green }}>
                 Produto
@@ -248,7 +244,7 @@ export default function TabExternalRequestDetails() {
             ))}
           </View>
 
-          <Texts.Bold
+          {/* <Texts.Bold
             style={{
               color: theme.colors.primary.green,
               fontSize: 24,
@@ -272,7 +268,7 @@ export default function TabExternalRequestDetails() {
                 </Texts.SemiBold>
               </View>
             ))}
-          </View>
+          </View> */}
         </Containers.Scroll>
       )}
     </View>

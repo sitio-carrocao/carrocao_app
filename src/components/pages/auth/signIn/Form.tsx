@@ -27,7 +27,7 @@ const formSchema = z.object({
 })
 
 function SignInForm() {
-  const { saveToken } = useSession()
+  const { saveToken, saveCode } = useSession()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     reValidateMode: 'onBlur',
@@ -53,8 +53,9 @@ function SignInForm() {
         type: 'error',
       })
     },
-    onSuccess: response => {
+    onSuccess: (response, variables) => {
       saveToken(response.token)
+      saveCode(variables.code)
       router.replace({
         pathname: '/(tabs)/(internal-request)',
       })

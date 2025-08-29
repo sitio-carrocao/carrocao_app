@@ -1,6 +1,9 @@
 import AddImage, {
   type IPropsRef as AddImageRef,
 } from '@components/pages/tabs/stock/product/AddImage'
+import Addresses, {
+  type IRefProps as AddressRef,
+} from '@components/pages/tabs/stock/product/Addresses'
 import OptionsImage, {
   type IPropsRef as OptionsImageRef,
 } from '@components/pages/tabs/stock/product/OptionsImage'
@@ -12,11 +15,10 @@ import Inputs, { type RootRefProps } from '@components/ui/inputs'
 import Texts from '@components/ui/Texts'
 import toast from '@components/ui/toast'
 import theme from '@constants/themes'
+import useStock from '@contexts/stock'
 import { zodResolver } from '@hookform/resolvers/zod'
 import ProductService from '@services/product/ProductService'
-import StockService from '@services/stock/StockService'
-import UtilsService from '@services/utils/UtilsService'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { Ellipsis, ImagePlus } from 'lucide-react-native'
@@ -34,6 +36,9 @@ import z from 'zod'
 
 const formSchema = z.object({
   name: z.string().min(1, {
+    message: 'O campo é obrigatório',
+  }),
+  suggestedAddress: z.string().min(1, {
     message: 'O campo é obrigatório',
   }),
   barcode: z.string().min(1, {
@@ -59,7 +64,16 @@ const formSchema = z.object({
 })
 
 export default function TabStockProduc() {
-  const queryClient = useQueryClient()
+  const {
+    onLoadCurrentTask,
+    onLoadTasks,
+    currentTask,
+    productTypes,
+    stockTypes,
+    unitMeasurements,
+    addresses,
+  } = useStock()
+  const addressRef = useRef<AddressRef>(null)
   const barcodeRef = useRef<RootRefProps>(null)
   const modelRef = useRef<RootRefProps>(null)
   const minRef = useRef<RootRefProps>(null)
@@ -72,27 +86,25 @@ export default function TabStockProduc() {
 
   const [status, requestPermission] = ImagePicker.useCameraPermissions()
 
-  const { data: details } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.getValidatedProductDetails()
-      return response
-    },
-    queryKey: ['validatedProductDetails'],
-    refetchOnWindowFocus: false,
-  })
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     reValidateMode: 'onBlur',
     defaultValues: {
-      name: details?.description || '',
-      barcode: details?.barcode || '',
+      name: currentTask?.description || '',
+      barcode: currentTask?.barcode || '',
       max: '',
       min: '',
       model: '',
       productType: '',
       stockType: '',
-      unitMensuare: details?.unitMeasurement || '',
+      unitMensuare:
+        unitMeasurements
+          .find(
+            item =>
+              item.name.toLowerCase() ===
+              currentTask?.unitMeasurement.toLowerCase()
+          )
+          ?.id.toString() || '',
       observation: '',
     },
   })
@@ -106,13 +118,7 @@ export default function TabStockProduc() {
         type: 'error',
       })
     },
-    onSuccess: () => {
-      queryClient.resetQueries({
-        queryKey: ['validatedProducts'],
-      })
-      queryClient.resetQueries({
-        queryKey: ['validatedProductDetails'],
-      })
+    onSuccess: async () => {
       router.dismissTo({
         pathname: '/(tabs)/(stock)',
       })
@@ -121,48 +127,16 @@ export default function TabStockProduc() {
         title: 'Parabéns',
         type: 'success',
       })
+      await onLoadCurrentTask()
+      await onLoadTasks()
     },
-  })
-
-  const { data: productTypes } = useQuery({
-    queryFn: async () => {
-      const response = await UtilsService.getAllProductTypes()
-      return response
-    },
-    queryKey: ['productTypes'],
-    refetchOnWindowFocus: false,
-  })
-
-  const { data: stockTypes } = useQuery({
-    queryFn: async () => {
-      const response = await UtilsService.getAllStockTypes()
-      return response
-    },
-    queryKey: ['stockTypes'],
-    refetchOnWindowFocus: false,
-  })
-
-  const { data: unitMeasurements } = useQuery({
-    queryFn: async () => {
-      const response = await UtilsService.getAllUnitMeasurements()
-      const option = response.list.find(
-        item =>
-          item.name.toLowerCase() === details?.unitMeasurement.toLowerCase()
-      )
-      if (option) {
-        form.setValue('unitMensuare', option.id.toString())
-      }
-      return response
-    },
-    queryKey: ['unitMeasurements'],
-    refetchOnWindowFocus: false,
   })
 
   const openGallery = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
-      quality: 1,
+      quality: 0.4,
     })
     if (!result.canceled) {
       setImages(oldState => {
@@ -185,7 +159,7 @@ export default function TabStockProduc() {
       mediaTypes: ['images'],
       allowsEditing: true,
       cameraType: ImagePicker.CameraType.back,
-      quality: 1,
+      quality: 0.4,
     })
     if (!result.canceled) {
       setImages(oldState => {
@@ -202,8 +176,9 @@ export default function TabStockProduc() {
 
   const viewImage = useCallback(
     (index: number) => {
+      optionsImageRef.current?.close()
       router.navigate({
-        pathname: '/(tabs)/(stock)/product',
+        pathname: '/(tabs)/(stock)/image',
         params: {
           uri: images[index].uri,
         },
@@ -230,6 +205,9 @@ export default function TabStockProduc() {
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>): Promise<void> => {
+      const address = addresses.find(
+        item => item.id === Number(values.suggestedAddress)
+      )
       await mutateAsync({
         active: true,
         barcode: values.barcode,
@@ -246,10 +224,11 @@ export default function TabStockProduc() {
           uri: item.uri,
           mimeType: item.mimeType!,
         })),
-        id: details!.id,
+        id: currentTask!.id,
+        suggestedAddress: `${address!.column} | ${address!.level} ${address!.deposit ? '| ' + address!.deposit : ''}`,
       })
     },
-    [mutateAsync, images, details]
+    [mutateAsync, images, currentTask, addresses]
   )
 
   return (
@@ -262,7 +241,6 @@ export default function TabStockProduc() {
             label="Nome"
             error={fieldState.error?.message}
             inputProps={{
-              autoCapitalize: 'none',
               onSubmitEditing: handleFocusBarcodeInput,
               returnKeyType: 'next',
               submitBehavior: 'submit',
@@ -281,7 +259,7 @@ export default function TabStockProduc() {
             label="Código de barras"
             error={fieldState.error?.message}
             inputProps={{
-              autoCapitalize: 'none',
+              editable: false,
               keyboardType: 'numeric',
               onSubmitEditing: handleFocusModelInput,
               returnKeyType: 'next',
@@ -302,7 +280,6 @@ export default function TabStockProduc() {
             label="Modelo"
             error={fieldState.error?.message}
             inputProps={{
-              autoCapitalize: 'none',
               onSubmitEditing: handleFocusMinInput,
               returnKeyType: 'next',
               submitBehavior: 'submit',
@@ -364,6 +341,23 @@ export default function TabStockProduc() {
 
       <Controller
         control={form.control}
+        name="suggestedAddress"
+        render={({ field: { value, onChange, onBlur }, fieldState }) => (
+          <Addresses
+            error={fieldState.error?.message}
+            value={value}
+            ref={addressRef}
+            data={addresses || []}
+            onSelect={({ id }) => {
+              onChange(id.toString())
+              onBlur()
+            }}
+          />
+        )}
+      />
+
+      <Controller
+        control={form.control}
         name="productType"
         render={({ field: { value, onChange, onBlur }, fieldState }) => (
           <Select
@@ -372,7 +366,7 @@ export default function TabStockProduc() {
             value={value}
             ref={productTypeRef}
             data={
-              productTypes?.list.map(item => ({
+              productTypes.map(item => ({
                 label: item.description,
                 value: item.id.toString(),
               })) || []
@@ -395,7 +389,7 @@ export default function TabStockProduc() {
             value={value}
             ref={productTypeRef}
             data={
-              stockTypes?.list.map(item => ({
+              stockTypes.map(item => ({
                 label: item.description,
                 value: item.id.toString(),
               })) || []
@@ -418,7 +412,7 @@ export default function TabStockProduc() {
             value={value}
             ref={productTypeRef}
             data={
-              unitMeasurements?.list.map(item => ({
+              unitMeasurements.map(item => ({
                 label: item.name,
                 value: item.id.toString(),
               })) || []
@@ -443,8 +437,6 @@ export default function TabStockProduc() {
             label="Observação"
             error={fieldState.error?.message}
             inputProps={{
-              autoCapitalize: 'none',
-              keyboardType: 'numeric',
               returnKeyType: 'next',
               submitBehavior: 'blurAndSubmit',
               numberOfLines: 3,
@@ -452,7 +444,6 @@ export default function TabStockProduc() {
               onChangeText: onChange,
               value,
             }}
-            ref={maxRef}
           />
         )}
       />

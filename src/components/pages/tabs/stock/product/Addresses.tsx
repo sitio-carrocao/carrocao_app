@@ -17,7 +17,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native'
+import {
+  Dimensions,
+  Keyboard,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { KeyboardEvents } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -81,7 +87,7 @@ export default function Addresses({
 
   const filteredData = useMemo(() => {
     return data.filter(item =>
-      `${item.level} ${item.level}`
+      `${item.column} | ${item.level} ${item.deposit ? '| ' + item.deposit : ''}`
         .toLowerCase()
         .includes(search.toLocaleLowerCase())
     )
@@ -99,6 +105,20 @@ export default function Addresses({
 
     return () => {
       show.remove()
+    }
+  }, [])
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      // setKeyboardStatus('Keyboard Shown')
+    })
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      bottomSheetModalRef.current?.collapse()
+    })
+
+    return () => {
+      showSubscription.remove()
+      hideSubscription.remove()
     }
   }, [])
 
@@ -186,6 +206,7 @@ export default function Addresses({
 const styles = StyleSheet.create({
   container: {
     rowGap: 8,
+    marginBottom: 8,
   },
   headerContainer: {
     backgroundColor: theme.colors.background.general,

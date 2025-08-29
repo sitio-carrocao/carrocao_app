@@ -3,10 +3,8 @@ import SeparationInitialCurrentTask from '@components/pages/tabs/separation/init
 import SeparationInitialItem from '@components/pages/tabs/separation/initial/Item'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
-import EInternalRequestStatus from '@enums/internalRequestStatus'
+import useSeparation from '@contexts/separation'
 import type { InternalRequestList } from '@models/InternalRequest'
-import StockService from '@services/stock/StockService'
-import { useQuery } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import {
   ActivityIndicator,
@@ -17,42 +15,22 @@ import {
 } from 'react-native'
 
 export default function TabSeparationInitial() {
+  const {
+    currentTask,
+    tasksLists,
+    onLoadCurrentTask,
+    onLoadTasks,
+    isLoadingCurrentTask,
+    isLoadingTaskList,
+  } = useSeparation()
   const [isRefresh, setIsRefresh] = useState<boolean>(false)
-
-  const {
-    data,
-    isPending: isPendingGetAll,
-    refetch,
-  } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.getAllInternalRequest({
-        status: EInternalRequestStatus.WaitingForSeparation,
-      })
-      return response
-    },
-    queryKey: ['separationTasks'],
-    refetchOnWindowFocus: false,
-  })
-
-  const {
-    data: currentTask,
-    refetch: refetchCurrentTask,
-    isPending: isPendingStockRequest,
-  } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.stockRequestVerifyTask()
-      return response
-    },
-    queryKey: ['separationCurrentTask'],
-    refetchOnWindowFocus: false,
-  })
 
   const onRefresh = useCallback(async () => {
     setIsRefresh(true)
-    await refetch()
-    await refetchCurrentTask()
+    await onLoadTasks()
+    await onLoadCurrentTask()
     setIsRefresh(false)
-  }, [refetch, refetchCurrentTask])
+  }, [onLoadTasks, onLoadCurrentTask])
 
   return (
     <View style={styles.container}>
@@ -61,14 +39,12 @@ export default function TabSeparationInitial() {
         refreshing={isRefresh}
         ListHeaderComponent={
           <View>
-            {currentTask && (
-              <SeparationInitialCurrentTask
-                data={currentTask ? currentTask : null}
-              />
+            {!!currentTask && (
+              <SeparationInitialCurrentTask data={currentTask} />
             )}
-            {!isPendingGetAll &&
-              !isPendingStockRequest &&
-              data?.list.length && (
+            {!isLoadingTaskList &&
+              !isLoadingCurrentTask &&
+              !!tasksLists.length && (
                 <Texts.Bold
                   style={{
                     fontSize: 24,
@@ -80,7 +56,7 @@ export default function TabSeparationInitial() {
           </View>
         }
         ListEmptyComponent={
-          !data?.list.length && (isPendingGetAll || isPendingStockRequest) ? (
+          !tasksLists.length && (isLoadingTaskList || isLoadingCurrentTask) ? (
             <View style={styles.emptyContainer}>
               <ActivityIndicator color={theme.colors.primary.green} size={80} />
               <Texts.Bold style={{ fontSize: 18, marginTop: 24 }}>
@@ -97,7 +73,7 @@ export default function TabSeparationInitial() {
           )
         }
         contentContainerStyle={styles.contentContainer}
-        data={data?.list}
+        data={tasksLists}
         renderItem={({ item }) => (
           <SeparationInitialItem disableButton={!!currentTask} item={item} />
         )}

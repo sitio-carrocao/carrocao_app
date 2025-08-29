@@ -8,4 +8,10 @@ export interface InternalRequestList {
   date: string
   id: number
   status: EInternalRequestStatus
+  address: {
+    column: string
+    deposit: string
+    id: number
+    level: string
+  } | null
 }

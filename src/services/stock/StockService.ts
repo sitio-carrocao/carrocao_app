@@ -4,7 +4,7 @@ import type EInternalRequestStatus from '@enums/internalRequestStatus'
 import type EValidatedProductsStatus from '@enums/validatedProductStatus'
 import HttpClient from '@services/core/HttpClient'
 import ImageService from '@services/image/ImageService'
-import { HttpStatusCode } from 'axios'
+import axios, { type AxiosResponse, HttpStatusCode } from 'axios'
 import { Platform } from 'react-native'
 
 import type IAttachAdminToValidatedInputData from './dtos/attachAdminToValidated/InputData'
@@ -18,6 +18,7 @@ import type IGetAllCollaboratorInternalRequestInputData from './dtos/getAllColla
 import type IGetAllCollaboratorInternalRequestOutputData from './dtos/getAllCollaboratorInternalRequest/OutputData'
 import type IGetAllInternalRequestInputData from './dtos/getAllInternalRequest/InputData'
 import type IGetAllInternalRequestOutputData from './dtos/getAllInternalRequest/OutputData'
+import type IGetCostCentersOutputData from './dtos/getCostCenters/OutputData'
 import type IGetExternalRequestDetailsInputData from './dtos/getExternalRequestDetails/InputData'
 import type IGetExternalRequestDetailsOutputData from './dtos/getExternalRequestDetails/OutputData'
 import type IGetInternalRequestDetailsInputData from './dtos/getInternalRequestDetails/InputData'
@@ -26,6 +27,8 @@ import type IGetStockRequestDetailsInputData from './dtos/getStockRequestDetails
 import type IGetStockRequestDetailsOutputData from './dtos/getStockRequestDetails/OutputData'
 import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProductDetails/OutputData'
 import type IGetValidatedProductsOutputData from './dtos/getValidatedProducts/OutputData'
+import type IPrintIdentifyInputData from './dtos/printIdentify/InputData'
+import type IPrintStockRequestInputData from './dtos/printStockRequest/InputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
 import type IStockRequestTaskOutputData from './dtos/stockRequestTask/OutputData'
@@ -49,8 +52,8 @@ interface ICreateInternalRequestBodyRequest {
   products: {
     id: number
     quantity: number
+    cost_center_id: number
   }[]
-  whereUsed: string
 }
 
 interface ICreateProductStockBodyRequest {
@@ -87,6 +90,12 @@ interface IGetAllCollaboratorInternalRequestResponse {
       id: number | null
       name: string | null
     }
+    address: {
+      column: string
+      deposit: string
+      id: number
+      level: string
+    } | null
     id: number
     status: EInternalRequestStatus
   }[]
@@ -139,6 +148,12 @@ interface IGetInternalRequestDetailsResponse {
   }
   date: string
   id: number
+  address: {
+    column: string
+    deposit: string
+    id: number
+    level: string
+  } | null
   products: {
     id: number
     name: string
@@ -165,6 +180,7 @@ interface IGetValidatedProductsResponse {
       name: string | null
     }
     alreadyRegistered: boolean
+    adminSuggestedAddress: string
     barcode: string
     description: string
     id: number
@@ -187,6 +203,7 @@ interface IGetValidatedProductDetailsResponse {
   admin: {
     name: string | null
   }
+  adminSuggestedAddress: string
   alreadyRegistered: boolean
   barcode: string
   description: string
@@ -203,6 +220,7 @@ interface IGetValidatedProductDetailsResponse {
   } | null
   unitMeasurement: string
   value: number
+  validateDateRequired: boolean
 }
 
 interface ISearchByBarcodeResponse {
@@ -212,6 +230,13 @@ interface ISearchByBarcodeResponse {
   minimum_stock: number | null
   name: string
   unit_measurement: string
+}
+
+interface ICostCentersResponse {
+  list: {
+    id: number
+    description: string
+  }[]
 }
 
 interface IStockRequestTaskResponse {
@@ -297,7 +322,6 @@ class StockService implements IStockRepository {
   ): Promise<void> {
     const body: ICreateInternalRequestBodyRequest = {
       products: inputData.products,
-      whereUsed: inputData.whereUsed,
     }
     await HttpClient.post<void, ICreateInternalRequestBodyRequest>({
       path: 'app/stock/request-products',
@@ -401,6 +425,7 @@ class StockService implements IStockRepository {
         date: item.date,
         id: item.id,
         status: item.status,
+        address: item.address,
       })),
       pagination: {
         current: response.data.pagination.current,
@@ -474,6 +499,7 @@ class StockService implements IStockRepository {
     const output: IGetInternalRequestDetailsOutputData = {
       admin: { id: response.data.admin.id, name: response.data.admin.name },
       date: response.data.date,
+      address: response.data.address,
       id: response.data.id,
       products: response.data.products.map(item => ({
         id: item.id,
@@ -532,6 +558,7 @@ class StockService implements IStockRepository {
   public async getValidatedProducts(): Promise<IGetValidatedProductsOutputData> {
     const response = await HttpClient.get<IGetValidatedProductsResponse>({
       path: `app/stock/validated-products`,
+      params: { inStock: '0' },
     })
     const output: IGetValidatedProductsOutputData = {
       list: response.data.list.map(item => ({
@@ -541,6 +568,7 @@ class StockService implements IStockRepository {
         description: item.description,
         id: item.id,
         quantity: item.quantity,
+        adminSuggestedAddress: item.adminSuggestedAddress,
         suggestedAddress: item.suggestedAddress
           ? {
               column: item.suggestedAddress.column,
@@ -579,6 +607,8 @@ class StockService implements IStockRepository {
       status: response.data.status,
       unitMeasurement: response.data.unitMeasurement,
       value: response.data.value,
+      adminSuggestedAddress: response.data.adminSuggestedAddress,
+      validateDateRequired: response.data.validateDateRequired,
     }
     return output
   }
@@ -609,6 +639,14 @@ class StockService implements IStockRepository {
       unitMeasurement: response.data.unit_measurement,
     }
     return output
+  }
+
+  public async printStockRequest(
+    inputData: IPrintStockRequestInputData
+  ): Promise<void> {
+    await HttpClient.get({
+      path: `app/stock/requests/${inputData.id}/print`,
+    })
   }
 
   public async attachCollaboratorToStockRequest(
@@ -656,7 +694,36 @@ class StockService implements IStockRepository {
   ): Promise<void> {
     await HttpClient.post({
       path: `app/stock/requests/${inputData.id}/waiting-withdraw`,
+      body: {
+        addressId: inputData.addressId,
+      },
     })
+  }
+
+  public async printIdentify(
+    inputData: IPrintIdentifyInputData
+  ): Promise<void> {
+    await HttpClient.post({
+      path: `app/stock/requests/print-identify`,
+      body: {
+        identify: inputData.identify,
+        type: inputData.type,
+      },
+    })
+  }
+
+  public async costCenters(): Promise<IGetCostCentersOutputData> {
+    const response: AxiosResponse<ICostCentersResponse> = await axios({
+      method: 'get',
+      url: 'https://api-app-colaboradores.carrocao.com/financial/cost-centers?page=1&rows_per_page=400',
+    })
+    const output: IGetCostCentersOutputData = {
+      list: response.data.list.map(item => ({
+        id: item.id,
+        description: item.description,
+      })),
+    }
+    return output
   }
 }
 

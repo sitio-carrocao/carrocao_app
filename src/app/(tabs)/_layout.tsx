@@ -40,11 +40,11 @@ export default function TabLayout() {
           <Tabs.Screen
             name="(internal-request)"
             options={{
-              title: 'Solicitações internas',
+              title: 'Solicitações produtos',
               tabBarLabel: ({ color }) => (
                 <Texts.Medium
                   style={{ color, fontSize: 10, textAlign: 'center' }}>
-                  Solicitações internas
+                  Solicitações produtos
                 </Texts.Medium>
               ),
               tabBarIcon: ({ color }) => (
@@ -55,11 +55,11 @@ export default function TabLayout() {
           <Tabs.Screen
             name="(external-request)"
             options={{
-              title: 'Solicitações externas',
+              title: 'Solicitações compra',
               tabBarLabel: ({ color }) => (
                 <Texts.Medium
                   style={{ color, fontSize: 10, textAlign: 'center' }}>
-                  Solicitações externas
+                  Solicitações compra
                 </Texts.Medium>
               ),
               tabBarIcon: ({ color }) => (

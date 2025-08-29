@@ -8,6 +8,12 @@ interface IGetInternalRequestDetailsOutputData {
   }
   date: string
   id: number
+  address: {
+    column: string
+    deposit: string
+    id: number
+    level: string
+  } | null
   products: {
     id: number
     name: string

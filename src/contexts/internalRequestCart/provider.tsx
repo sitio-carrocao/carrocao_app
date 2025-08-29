@@ -5,7 +5,7 @@ import type IProduct from '@models/Product'
 import type { IInternalRequestCart } from '@models/Product'
 import { createContext, type PropsWithChildren, useCallback } from 'react'
 
-import type { UseInternalRequestCart } from './index'
+import type { Product, UseInternalRequestCart } from './index'
 
 const InternalRequestCartContext = createContext<UseInternalRequestCart>({
   removeAll: () => null,
@@ -39,8 +39,12 @@ const InternalRequestCartProvider = ({ children }: PropsWithChildren) => {
   )
 
   const addProduct = useCallback(
-    (product: IProduct): void => {
+    (product: Product): void => {
       const stateParsed: IInternalRequestCart[] = cart ? JSON.parse(cart) : []
+      const productExists = stateParsed.find(item => item.id === product.id)
+      if (productExists) {
+        return
+      }
       const newState = stateParsed.concat({ ...product, quantitySelected: 1 })
       const newCart = JSON.stringify(newState)
       setCart(newCart)

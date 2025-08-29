@@ -4,12 +4,19 @@ import { use } from 'react'
 
 import { InternalRequestCartContext } from './provider'
 
+export interface Product extends IProduct {
+  reason: {
+    id: number
+    description: string
+  }
+}
+
 interface IUseInternalRequestCart {
   products: IInternalRequestCart[]
   removeAll: () => void
   removeProduct: (id: number) => void
   updateQuantity: (id: number, quantity: number) => void
-  addProduct: (product: IProduct) => void
+  addProduct: (product: Product) => void
   isLoading: boolean
 }
 

@@ -10,10 +10,14 @@ const AuthContext = createContext<UseAuth>({
   saveToken: () => null,
   session: null,
   isLoading: false,
+  removeCode: () => null,
+  saveCode: () => null,
+  code: null,
 })
 
 const SessionProvider = ({ children }: PropsWithChildren) => {
   const [[isLoading, session], setSession] = useStorageState(storageKeys.token)
+  const [[isLoadingCode, code], setCode] = useStorageState(storageKeys.code)
 
   if (session) {
     HttpClient.setBearerToken(session)
@@ -27,6 +31,17 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
     [setSession]
   )
 
+  const saveCode = useCallback(
+    (code: string): void => {
+      setCode(code)
+    },
+    [setCode]
+  )
+
+  const removeCode = useCallback((): void => {
+    setCode(null)
+  }, [setCode])
+
   const removeToken = useCallback((): void => {
     setSession(null)
     HttpClient.removeBearerToken()
@@ -38,7 +53,10 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
         session,
         saveToken,
         removeToken,
+        saveCode,
+        removeCode,
         isLoading,
+        code,
       }}>
       {children}
     </AuthContext.Provider>

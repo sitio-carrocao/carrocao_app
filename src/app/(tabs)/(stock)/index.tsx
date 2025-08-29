@@ -3,9 +3,9 @@ import StockInitialCurrentTask from '@components/pages/tabs/stock/initial/Curren
 import StockInitialItem from '@components/pages/tabs/stock/initial/Item'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
+import useSession from '@contexts/session'
+import useStock from '@contexts/stock'
 import type IValidateProduct from '@models/ValidateProduct'
-import StockService from '@services/stock/StockService'
-import { useQuery } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import {
   ActivityIndicator,
@@ -16,68 +16,57 @@ import {
 } from 'react-native'
 
 export default function TabStockInitial() {
+  const { code } = useSession()
+  const {
+    currentTask,
+    tasksLists,
+    onLoadCurrentTask,
+    onLoadTasks,
+    isLoadingCurrentTask,
+    isLoadingTaskList,
+  } = useStock()
   const [isRefresh, setIsRefresh] = useState<boolean>(false)
-
-  const {
-    data,
-    isPending,
-    refetch: refetchProducts,
-  } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.getValidatedProducts()
-      return response
-    },
-    queryKey: ['validatedProducts'],
-    refetchOnWindowFocus: false,
-  })
-
-  const {
-    data: details,
-    isPending: isPendingDetails,
-    refetch: refetchDetails,
-  } = useQuery({
-    queryFn: async () => {
-      const response = await StockService.getValidatedProductDetails()
-      return response
-    },
-    queryKey: ['validatedProductDetails'],
-    refetchOnWindowFocus: false,
-  })
 
   const onRefresh = useCallback(async () => {
     setIsRefresh(true)
-    await refetchProducts()
-    await refetchDetails()
+    await onLoadTasks()
+    await onLoadCurrentTask()
     setIsRefresh(false)
-  }, [refetchDetails, refetchProducts])
+  }, [onLoadTasks, onLoadCurrentTask])
 
   return (
     <View style={styles.container}>
       <FlatList<IValidateProduct>
         ListHeaderComponent={
           <View>
-            {details && <StockInitialCurrentTask data={details} />}
-            {!isPending && !isPendingDetails && data?.list.length && (
-              <Texts.Bold
-                style={{
-                  fontSize: 24,
-                  color: theme.colors.primary.green,
-                }}>
-                Tarefas
-              </Texts.Bold>
-            )}
+            {!!currentTask && <StockInitialCurrentTask data={currentTask} />}
+            {!isLoadingTaskList &&
+              !isLoadingCurrentTask &&
+              !!tasksLists.length && (
+                <Texts.Bold
+                  style={{
+                    fontSize: 24,
+                    color: theme.colors.primary.green,
+                  }}>
+                  Tarefas
+                </Texts.Bold>
+              )}
           </View>
         }
         contentContainerStyle={styles.contentContainer}
-        data={data?.list}
+        data={
+          code !== '0001'
+            ? tasksLists.filter(item => item.alreadyRegistered)
+            : tasksLists
+        }
         keyExtractor={item => String(item.id)}
         renderItem={({ item }) => (
-          <StockInitialItem disableButton={!!details} item={item} />
+          <StockInitialItem disableButton={!!currentTask} item={item} />
         )}
         onRefresh={onRefresh}
         refreshing={isRefresh}
         ListEmptyComponent={
-          !data?.list.length && (isPending || isPendingDetails) ? (
+          !tasksLists.length && (isLoadingTaskList || isLoadingCurrentTask) ? (
             <View style={styles.emptyContainer}>
               <ActivityIndicator color={theme.colors.primary.green} size={80} />
               <Texts.Bold style={{ fontSize: 18, marginTop: 24 }}>

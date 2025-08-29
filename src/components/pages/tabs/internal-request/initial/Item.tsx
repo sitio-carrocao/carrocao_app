@@ -59,6 +59,11 @@ export default function InternalRequestInitialItem({ item }: IProps) {
             {dataParsed?.status}
           </Texts.SemiBold>
         </View>
+        {item.address && (
+          <Texts.SemiBold style={{ fontSize: 16 }}>
+            {`Bandeja: ${item.address?.column} | ${item.address?.level} ${item.address?.deposit ? '| ' + item.address.deposit : ''}`}
+          </Texts.SemiBold>
+        )}
       </View>
     </TouchableOpacity>
   )

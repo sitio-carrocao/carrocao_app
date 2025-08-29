@@ -1,10 +1,11 @@
 import Button from '@components/ui/Button'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
+import useStock from '@contexts/stock'
 import EValidatedProductsStatus from '@enums/validatedProductStatus'
 import type IValidateProduct from '@models/ValidateProduct'
 import StockService from '@services/stock/StockService'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { Circle } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -15,7 +16,7 @@ interface IProps {
 }
 
 export default function StockInitialItem({ item, disableButton }: IProps) {
-  const queryClient = useQueryClient()
+  const { onLoadCurrentTask, onLoadTasks } = useStock()
   const dataParsed = useMemo(() => {
     if (item?.status === EValidatedProductsStatus.Available) {
       return {
@@ -39,13 +40,9 @@ export default function StockInitialItem({ item, disableButton }: IProps) {
 
   const { isPending, mutateAsync, variables } = useMutation({
     mutationFn: StockService.attachAdminToValidated,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['validatedProducts'],
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['validatedProductDetails'],
-      })
+    onSuccess: async () => {
+      await onLoadCurrentTask()
+      await onLoadTasks()
     },
   })
 
@@ -58,6 +55,14 @@ export default function StockInitialItem({ item, disableButton }: IProps) {
 
   return (
     <View style={styles.container}>
+      <Texts.Bold
+        style={{
+          fontSize: 18,
+          textAlign: 'center',
+          color: theme.colors.primary.green,
+        }}>
+        {item.alreadyRegistered ? 'Armazenar produto' : 'Registrar produto'}
+      </Texts.Bold>
       <Texts.SemiBold style={{ fontSize: 16 }}>
         Produto: {item.description}
       </Texts.SemiBold>
@@ -68,7 +73,7 @@ export default function StockInitialItem({ item, disableButton }: IProps) {
         Endereço:{' '}
         {item.suggestedAddress
           ? `${item.suggestedAddress.column} | ${item.suggestedAddress.level} ${item.suggestedAddress.deposit ? '| ' + item.suggestedAddress.deposit : ''}`
-          : 'Não informado'}
+          : item.adminSuggestedAddress}
       </Texts.SemiBold>
       <View style={styles.statusContainer}>
         <Texts.SemiBold style={{ fontSize: 16 }}>Status:</Texts.SemiBold>

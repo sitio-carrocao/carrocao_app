@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { type ExternalRequestList } from '@models/ExternalRequest'
 import StockService from '@services/stock/StockService'
 import { useQuery } from '@tanstack/react-query'
-import { format, subDays } from 'date-fns'
+import { format } from 'date-fns'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -58,7 +58,7 @@ export default function TabExternalRequestInitial() {
         rowsPerPage: 20,
         page: Number(page),
         endDate: format(new Date(), 'yyyy-MM-dd'),
-        startDate: format(subDays(new Date(), 100), 'yyyy-MM-dd'),
+        startDate: format(new Date(), 'yyyy-MM-dd'),
         status,
         name,
       })

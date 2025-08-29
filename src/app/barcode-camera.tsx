@@ -27,7 +27,7 @@ export default function BarcodeCamera() {
   const [isActive, setIsActive] = useState<boolean>(true)
 
   const codeScanner = useCodeScanner({
-    codeTypes: ['ean-13'],
+    codeTypes: ['ean-13', 'qr'],
     onCodeScanned: codes => {
       for (const code of codes) {
         setIsScanning(false)
@@ -64,6 +64,15 @@ export default function BarcodeCamera() {
               <View
                 style={[
                   styles.absoluteContainer,
+                  styles.verticalContainer,
+                  {
+                    top: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.absoluteContainer,
                   styles.horizontalContainer,
                   {
                     left: 0,
@@ -84,6 +93,15 @@ export default function BarcodeCamera() {
                   styles.horizontalContainer,
                   {
                     right: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.absoluteContainer,
+                  styles.verticalContainer,
+                  {
+                    bottom: 0,
                   },
                 ]}
               />
@@ -137,8 +155,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000BF',
   },
   horizontalContainer: {
-    width: '30%',
-    height: '100%',
-    top: 0,
+    width: '15%',
+    height: '40%',
+    top: '30%',
+  },
+  verticalContainer: {
+    width: '100%',
+    height: '30%',
   },
 })

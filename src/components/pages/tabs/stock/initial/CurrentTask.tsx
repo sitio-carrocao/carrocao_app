@@ -38,7 +38,7 @@ export default function StockInitialCurrentTask({ data }: IProps) {
       <View style={styles.container}>
         <View>
           <Texts.SemiBold style={{ color: theme.colors.primary.green }}>
-            Descrição
+            Produto
           </Texts.SemiBold>
           <Texts.Bold style={{ fontSize: 18 }}>{data?.description}</Texts.Bold>
         </View>
@@ -61,7 +61,7 @@ export default function StockInitialCurrentTask({ data }: IProps) {
           </View>
         </View>
 
-        {data?.suggestedAddress && (
+        {(data?.suggestedAddress || data.adminSuggestedAddress) && (
           <View>
             <Texts.SemiBold style={{ color: theme.colors.primary.green }}>
               Endereço sugerido
@@ -69,7 +69,7 @@ export default function StockInitialCurrentTask({ data }: IProps) {
             <Texts.Bold style={{ fontSize: 18 }}>
               {data?.suggestedAddress
                 ? `${data.suggestedAddress.column} | ${data.suggestedAddress.level} ${data.suggestedAddress.deposit ? '| ' + data.suggestedAddress.deposit : ''}`
-                : 'Não informado'}
+                : data.adminSuggestedAddress}
             </Texts.Bold>
           </View>
         )}

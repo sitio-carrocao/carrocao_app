@@ -9,6 +9,12 @@ interface IGetAllCollaboratorInternalRequestOutputData {
     date: string
     id: number
     status: EInternalRequestStatus
+    address: {
+      column: string
+      deposit: string
+      id: number
+      level: string
+    } | null
   }[]
   pagination: {
     current: number

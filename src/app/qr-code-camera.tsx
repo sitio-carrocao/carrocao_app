@@ -71,7 +71,7 @@ export default function QRCodeCamera() {
   return (
     <View style={styles.container}>
       {hasPermission ? (
-        <>
+        <View>
           {device && (
             <View style={styles.cameraContainer}>
               <View
@@ -120,7 +120,7 @@ export default function QRCodeCamera() {
               />
             </View>
           )}
-        </>
+        </View>
       ) : (
         <View style={styles.permissionContainer}>
           <LottieView

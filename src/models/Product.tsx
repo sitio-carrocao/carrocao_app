@@ -2,6 +2,10 @@ import type EProductStockStatus from '@enums/productStockStatus'
 
 interface IInternalRequestCart extends IProduct {
   quantitySelected: number
+  reason: {
+    id: number
+    description: string
+  }
 }
 
 interface IProduct {

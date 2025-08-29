@@ -13,7 +13,8 @@ class HttpClient {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: 'http://localhost:3333',
+      baseURL: 'https://eventos-backend.carrocao.com',
+      // baseURL: 'http://localhost:3333',
     })
     this.instance.interceptors.response.use(
       success => {
@@ -24,8 +25,8 @@ class HttpClient {
           const { status } = error.response
 
           if (status === 401) {
-            console.log('logout')
             storage.delete(storageKeys.token)
+            storage.delete(storageKeys.code)
             this.removeBearerToken()
           }
 

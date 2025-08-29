@@ -20,6 +20,10 @@ class StockAddressService implements IStockAddressRepository {
   ): Promise<IGetAllStockAddressesOutputData> {
     const response = await HttpClient.get<IGetAllResponse>({
       path: 'app/stock-address',
+      params: {
+        rowsPerPage: 500,
+        page: 1,
+      },
     })
     if (response.status === HttpStatusCode.NoContent) {
       const output: IGetAllStockAddressesOutputData = {

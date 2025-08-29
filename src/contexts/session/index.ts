@@ -6,7 +6,10 @@ interface IUseAuth {
   session: string | null
   removeToken(): void
   saveToken(string: string): void
+  removeCode(): void
+  saveCode(code: string): void
   isLoading: boolean
+  code: string | null
 }
 
 function useSession(): IUseAuth {

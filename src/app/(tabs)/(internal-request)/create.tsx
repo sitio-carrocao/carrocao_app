@@ -1,6 +1,9 @@
 import EmptyList from '@assets/empty-list.png'
 import InternalRequestCreateHeader from '@components/pages/tabs/internal-request/create/Header'
 import InternalRequestCreateItem from '@components/pages/tabs/internal-request/create/Item'
+import Reason, {
+  type IPropsRef as ReasonRef,
+} from '@components/pages/tabs/internal-request/create/Reason'
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,7 +11,7 @@ import type IProduct from '@models/Product'
 import ProductService from '@services/product/ProductService'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import {
   ActivityIndicator,
@@ -25,6 +28,7 @@ export const formInternalRequestCreateSchema = z.object({
 })
 
 export default function TabInternalRequestCreate() {
+  const reasonRef = useRef<ReasonRef>(null)
   const [isRefresh, setIsRefresh] = useState<boolean>(false)
   const { name = '', page = '1' } = useLocalSearchParams<{
     name: string
@@ -81,6 +85,10 @@ export default function TabInternalRequestCreate() {
     setIsRefresh(false)
   }, [refetch])
 
+  const handleSelectProduct = useCallback((product: IProduct) => {
+    reasonRef.current?.open(product)
+  }, [])
+
   return (
     <View style={styles.container}>
       <FormProvider {...form}>
@@ -96,9 +104,14 @@ export default function TabInternalRequestCreate() {
           }
           ListHeaderComponentStyle={styles.headerContainer}
           contentContainerStyle={styles.contentContainer}
-          data={data?.list}
+          data={data?.list.filter(item => item.quantity > 0)}
           keyExtractor={item => String(item.id)}
-          renderItem={({ item }) => <InternalRequestCreateItem item={item} />}
+          renderItem={({ item }) => (
+            <InternalRequestCreateItem
+              onSelectProduct={handleSelectProduct}
+              item={item}
+            />
+          )}
           stickyHeaderHiddenOnScroll
           stickyHeaderIndices={[0]}
           onRefresh={onRefresh}
@@ -141,6 +154,8 @@ export default function TabInternalRequestCreate() {
           }
         />
       </FormProvider>
+
+      <Reason ref={reasonRef} />
     </View>
   )
 }

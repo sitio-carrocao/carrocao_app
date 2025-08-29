@@ -71,7 +71,7 @@ export default function InternalRequestLayout() {
       <Stack.Screen
         name="cart"
         options={{
-          title: 'Carrinho solicitação interna',
+          title: 'Carrinho solicitação',
         }}
       />
     </Stack>

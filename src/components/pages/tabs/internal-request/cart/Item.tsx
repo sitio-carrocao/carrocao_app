@@ -50,6 +50,8 @@ export default function InternalRequestCartItem({ item }: IProps) {
           {`Em estoque: ${item.quantity} ${item.unitMeasurement.name}(s)`}
         </Texts.SemiBold>
 
+        <Texts.Regular>{item.reason.description}</Texts.Regular>
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             disabled={Number(quantity) === 1}

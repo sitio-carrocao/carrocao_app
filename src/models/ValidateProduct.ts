@@ -5,6 +5,7 @@ interface IValidateProduct {
     name: string | null
   }
   alreadyRegistered: boolean
+  adminSuggestedAddress: string
   barcode: string
   description: string
   id: number

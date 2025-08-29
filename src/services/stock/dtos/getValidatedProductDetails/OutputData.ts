@@ -18,6 +18,8 @@ interface IGetValidatedProductDetailsOutputData {
   } | null
   unitMeasurement: string
   value: number
+  adminSuggestedAddress: string
+  validateDateRequired: boolean
 }
 
 export default IGetValidatedProductDetailsOutputData

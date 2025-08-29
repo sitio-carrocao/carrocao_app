@@ -9,6 +9,7 @@ import type IGetAllCollaboratorInternalRequestInputData from './dtos/getAllColla
 import type IGetAllCollaboratorInternalRequestOutputData from './dtos/getAllCollaboratorInternalRequest/OutputData'
 import type IGetAllInternalRequestInputData from './dtos/getAllInternalRequest/InputData'
 import type IGetAllInternalRequestOutputData from './dtos/getAllInternalRequest/OutputData'
+import type IGetCostCentersOutputData from './dtos/getCostCenters/OutputData'
 import type IGetExternalRequestDetailsInputData from './dtos/getExternalRequestDetails/InputData'
 import type IGetExternalRequestDetailsOutputData from './dtos/getExternalRequestDetails/OutputData'
 import type IGetInternalRequestDetailsInputData from './dtos/getInternalRequestDetails/InputData'
@@ -17,6 +18,8 @@ import type IGetStockRequestDetailsInputData from './dtos/getStockRequestDetails
 import type IGetStockRequestDetailsOutputData from './dtos/getStockRequestDetails/OutputData'
 import type IGetValidatedProductDetailsOutputData from './dtos/getValidatedProductDetails/OutputData'
 import type IGetValidatedProductOutputData from './dtos/getValidatedProducts/OutputData'
+import type IPrintIdentifyInputData from './dtos/printIdentify/InputData'
+import type IPrintStockRequestInputData from './dtos/printStockRequest/InputData'
 import type ISearchByBarcodeInputData from './dtos/searchByBarcode/InputData'
 import type ISearchByBarcodeOutputData from './dtos/searchByBarcode/OutputData'
 import type IStockRequestTaskOutputData from './dtos/stockRequestTask/OutputData'
@@ -61,6 +64,9 @@ interface IStockRepository {
   waitingWithdrawRequestProduct(
     inputData: IWaitingWithdrawRequestProductInputData
   ): Promise<void>
+  printStockRequest(inputData: IPrintStockRequestInputData): Promise<void>
+  printIdentify(inputData: IPrintIdentifyInputData): Promise<void>
+  costCenters(): Promise<IGetCostCentersOutputData>
 }
 
 export default IStockRepository

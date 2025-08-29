@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "carrocao_app",
+    "name": "Carroção",
     "slug": "carrocao_app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "splash": {
       "image": "./src/assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1B4E2B"
     },
     "ios": {
       "supportsTablet": true,
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1B4E2B"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.carrocao_app"

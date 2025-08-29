@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "carrocaoapp.app"
-               BlueprintName = "carrocaoapp"
-               ReferencedContainer = "container:carrocaoapp.xcodeproj">
+               BuildableName = "Carroo.app"
+               BlueprintName = "Carroo"
+               ReferencedContainer = "container:Carroo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "carrocaoappTests.xctest"
-               BlueprintName = "carrocaoappTests"
-               ReferencedContainer = "container:carrocaoapp.xcodeproj">
+               BuildableName = "CarrooTests.xctest"
+               BlueprintName = "CarrooTests"
+               ReferencedContainer = "container:Carroo.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "carrocaoapp.app"
-            BlueprintName = "carrocaoapp"
-            ReferencedContainer = "container:carrocaoapp.xcodeproj">
+            BuildableName = "Carroo.app"
+            BlueprintName = "Carroo"
+            ReferencedContainer = "container:Carroo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "carrocaoapp.app"
-            BlueprintName = "carrocaoapp"
-            ReferencedContainer = "container:carrocaoapp.xcodeproj">
+            BuildableName = "Carroo.app"
+            BlueprintName = "Carroo"
+            ReferencedContainer = "container:Carroo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

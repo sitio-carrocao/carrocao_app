@@ -1,16 +1,17 @@
 import Texts from '@components/ui/Texts'
 import theme from '@constants/themes'
-import useInternalRequestCart from '@contexts/internalRequestCart'
 import type IProduct from '@models/Product'
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 interface IProps {
   item: IProduct
+  onSelectProduct: (product: IProduct) => void
 }
 
-export default function InternalRequestCreateItem({ item }: IProps) {
-  const { addProduct } = useInternalRequestCart()
-
+export default function InternalRequestCreateItem({
+  item,
+  onSelectProduct,
+}: IProps) {
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={{ uri: item.picture[0] }} />
@@ -19,30 +20,31 @@ export default function InternalRequestCreateItem({ item }: IProps) {
         <Texts.SemiBold>
           Em estoque:{' '}
           {item.quantity > 0
-            ? `${item.quantity} ${item.unitMeasurement.name}(s)`
+            ? `${item.quantity} ${item.unitMeasurement.name} (s)`
             : 'Sem estoque'}
         </Texts.SemiBold>
 
-        {item.quantity > 0 ? (
+        {item.quantity > 0 && (
           <TouchableOpacity
-            onPress={() => addProduct(item)}
+            onPress={() => onSelectProduct(item)}
             activeOpacity={theme.button.activeOpacity}
             style={styles.button}>
             <Texts.SemiBold style={{ color: theme.colors.background.general }}>
               Adicionar no carrinho
             </Texts.SemiBold>
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            activeOpacity={theme.button.activeOpacity}
-            style={[
-              styles.button,
-              { backgroundColor: theme.colors.primary.green },
-            ]}>
-            <Texts.SemiBold style={{ color: theme.colors.background.general }}>
-              Solicitar compra
-            </Texts.SemiBold>
-          </TouchableOpacity>
+          // )
+          // : (
+          //   <TouchableOpacity
+          //     activeOpacity={theme.button.activeOpacity}
+          //     style={[
+          //       styles.button,
+          //       { backgroundColor: theme.colors.primary.green },
+          //     ]}>
+          //     <Texts.SemiBold style={{ color: theme.colors.background.general }}>
+          //       Solicitar compra
+          //     </Texts.SemiBold>
+          //   </TouchableOpacity>
         )}
       </View>
     </View>

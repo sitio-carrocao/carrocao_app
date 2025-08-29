@@ -111,6 +111,13 @@ export default function TabInternalRequestDetails() {
                 {dataParsed?.status}
               </Texts.SemiBold>
             </View>
+
+            <Texts.SemiBold style={{ marginTop: 8 }}>Bandeja</Texts.SemiBold>
+            {data?.address && (
+              <Texts.Bold style={{ fontSize: 16 }}>
+                {`${data.address?.column} | ${data.address?.level} ${data.address?.deposit ? '| ' + data.address.deposit : ''}`}
+              </Texts.Bold>
+            )}
           </View>
 
           <Texts.Bold
@@ -146,7 +153,7 @@ export default function TabInternalRequestDetails() {
             ))}
           </View>
 
-          <Texts.Bold
+          {/* <Texts.Bold
             style={{
               color: theme.colors.primary.green,
               fontSize: 24,
@@ -170,7 +177,7 @@ export default function TabInternalRequestDetails() {
                 </Texts.SemiBold>
               </View>
             ))}
-          </View>
+          </View> */}
         </Containers.Scroll>
       )}
     </View>

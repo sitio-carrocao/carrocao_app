@@ -126,7 +126,6 @@ function InputBottomSheet({
           textAlignVertical="top"
           onChangeText={handleChangeText}
           onFocus={handleFocus}
-          placeholderTextColor={theme.colors.text.default}
           selectionColor={theme.colors.text.default}
           style={[styles.input, inputStyle]}
         />

@@ -1,7 +1,7 @@
 import type IStockRequestTaskOutputData from '@services/stock/dtos/stockRequestTask/OutputData'
 import { use } from 'react'
 
-import { SeparationContext } from './provider'
+import { type ITaskList, SeparationContext } from './provider'
 
 interface IUseSeparation {
   data: IStockRequestTaskOutputData | null
@@ -13,17 +13,12 @@ interface IUseSeparation {
     barcode: string
     productId: string
   }) => void
-  setAddress: ({
-    qrcode,
-    addressId,
-    productId,
-  }: {
-    qrcode: string
-    addressId: string
-    productId: string
-  }) => void
-  isLoading: boolean
-  handleLoadingSeparation(): Promise<void>
+  tasksLists: ITaskList[]
+  onLoadTasks: () => Promise<void>
+  currentTask: IStockRequestTaskOutputData | null
+  onLoadCurrentTask: () => Promise<void>
+  isLoadingCurrentTask: boolean
+  isLoadingTaskList: boolean
 }
 
 function useSeparation(): IUseSeparation {
