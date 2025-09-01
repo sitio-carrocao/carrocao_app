@@ -703,13 +703,18 @@ class StockService implements IStockRepository {
   public async printIdentify(
     inputData: IPrintIdentifyInputData
   ): Promise<void> {
-    await HttpClient.post({
-      path: `app/stock/requests/print-identify`,
-      body: {
-        identify: inputData.identify,
-        type: inputData.type,
-      },
-    })
+    try {
+      await HttpClient.post({
+        path: `app/stock/requests/print-identify`,
+        body: {
+          identify: inputData.identify,
+          type: inputData.type,
+          name: inputData.name,
+        },
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   public async costCenters(): Promise<IGetCostCentersOutputData> {

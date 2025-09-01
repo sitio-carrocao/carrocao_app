@@ -61,7 +61,7 @@ export default function InternalRequestInitialItem({ item }: IProps) {
         </View>
         {item.address && (
           <Texts.SemiBold style={{ fontSize: 16 }}>
-            {`Bandeja: ${item.address?.column} | ${item.address?.level} ${item.address?.deposit ? '| ' + item.address.deposit : ''}`}
+            {`${item.address?.column} ${item.address?.level}`}
           </Texts.SemiBold>
         )}
       </View>

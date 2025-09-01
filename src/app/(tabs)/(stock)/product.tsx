@@ -18,10 +18,11 @@ import theme from '@constants/themes'
 import useStock from '@contexts/stock'
 import { zodResolver } from '@hookform/resolvers/zod'
 import ProductService from '@services/product/ProductService'
+import StockService from '@services/stock/StockService'
 import { useMutation } from '@tanstack/react-query'
 import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
-import { Ellipsis, ImagePlus } from 'lucide-react-native'
+import { Ellipsis, ImagePlus, Printer } from 'lucide-react-native'
 import { useCallback, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import {
@@ -203,6 +204,14 @@ export default function TabStockProduc() {
     maxRef.current?.focus()
   }, [])
 
+  const handlePrintBarcode = useCallback(async () => {
+    await StockService.printIdentify({
+      identify: form.getValues('barcode'),
+      name: form.getValues('name'),
+      type: 'BARCODE',
+    })
+  }, [form])
+
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>): Promise<void> => {
       const address = addresses.find(
@@ -251,27 +260,44 @@ export default function TabStockProduc() {
           />
         )}
       />
-      <Controller
-        control={form.control}
-        name="barcode"
-        render={({ field: { onBlur, onChange, value }, fieldState }) => (
-          <Inputs.Root
-            label="Código de barras"
-            error={fieldState.error?.message}
-            inputProps={{
-              editable: false,
-              keyboardType: 'numeric',
-              onSubmitEditing: handleFocusModelInput,
-              returnKeyType: 'next',
-              submitBehavior: 'submit',
-              onBlur,
-              onChangeText: onChange,
-              value,
-            }}
-            ref={barcodeRef}
-          />
-        )}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 16 }}>
+        <Controller
+          control={form.control}
+          name="barcode"
+          render={({ field: { onBlur, onChange, value }, fieldState }) => (
+            <Inputs.Root
+              label="Código de barras"
+              error={fieldState.error?.message}
+              containerStyle={{ flex: 1 }}
+              inputProps={{
+                editable: false,
+                keyboardType: 'numeric',
+                onSubmitEditing: handleFocusModelInput,
+                returnKeyType: 'next',
+                submitBehavior: 'submit',
+                onBlur,
+                onChangeText: onChange,
+                value,
+              }}
+              ref={barcodeRef}
+            />
+          )}
+        />
+        <TouchableOpacity
+          activeOpacity={theme.button.activeOpacity}
+          style={{
+            backgroundColor: theme.colors.primary.green,
+            padding: 6,
+            borderRadius: 6,
+            height: 42,
+            width: 42,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={handlePrintBarcode}>
+          <Printer color={theme.colors.background.general} strokeWidth={1.5} />
+        </TouchableOpacity>
+      </View>
       <Controller
         control={form.control}
         name="model"

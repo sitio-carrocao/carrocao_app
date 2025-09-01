@@ -32,6 +32,7 @@ export default function BarcodeCamera() {
       for (const code of codes) {
         setIsScanning(false)
         setIsActive(false)
+        console.log(code.value)
         try {
           if (!code.value) {
             throw new Error()

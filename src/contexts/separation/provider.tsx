@@ -96,7 +96,7 @@ const SeparationProvider = ({ children }: PropsWithChildren) => {
           products: stateParsed.products.map(product => {
             if (
               Number(productId) === product.id &&
-              barcode === product.barcode
+              barcode.padStart(13, '0') === product.barcode
             ) {
               toast.show({
                 message: 'Produto verificado com sucesso',

@@ -147,7 +147,7 @@ export default function TabInternalRequestCreate() {
               <View style={styles.emptyContainer}>
                 <Image style={styles.emptyImage} source={EmptyList} />
                 <Texts.Bold style={{ fontSize: 18, marginTop: 24 }}>
-                  Nenhuma solicitação encontrada
+                  Nenhum produto encontrado
                 </Texts.Bold>
               </View>
             )

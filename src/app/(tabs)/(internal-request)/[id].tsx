@@ -112,10 +112,12 @@ export default function TabInternalRequestDetails() {
               </Texts.SemiBold>
             </View>
 
-            <Texts.SemiBold style={{ marginTop: 8 }}>Bandeja</Texts.SemiBold>
+            <Texts.SemiBold style={{ marginTop: 8 }}>
+              Local de retirada
+            </Texts.SemiBold>
             {data?.address && (
               <Texts.Bold style={{ fontSize: 16 }}>
-                {`${data.address?.column} | ${data.address?.level} ${data.address?.deposit ? '| ' + data.address.deposit : ''}`}
+                {`${data.address?.column} ${data.address?.level}`}
               </Texts.Bold>
             )}
           </View>

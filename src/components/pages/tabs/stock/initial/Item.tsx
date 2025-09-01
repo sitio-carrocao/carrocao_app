@@ -69,12 +69,14 @@ export default function StockInitialItem({ item, disableButton }: IProps) {
       <Texts.SemiBold style={{ fontSize: 16 }}>
         Quantidade: {item.quantity}
       </Texts.SemiBold>
-      <Texts.SemiBold style={{ fontSize: 16 }}>
-        Endereço:{' '}
-        {item.suggestedAddress
-          ? `${item.suggestedAddress.column} | ${item.suggestedAddress.level} ${item.suggestedAddress.deposit ? '| ' + item.suggestedAddress.deposit : ''}`
-          : item.adminSuggestedAddress}
-      </Texts.SemiBold>
+      {item.alreadyRegistered && (
+        <Texts.SemiBold style={{ fontSize: 16 }}>
+          Endereço:{' '}
+          {item.suggestedAddress
+            ? `${item.suggestedAddress.column} | ${item.suggestedAddress.level} ${item.suggestedAddress.deposit ? '| ' + item.suggestedAddress.deposit : ''}`
+            : item.adminSuggestedAddress}
+        </Texts.SemiBold>
+      )}
       <View style={styles.statusContainer}>
         <Texts.SemiBold style={{ fontSize: 16 }}>Status:</Texts.SemiBold>
         <Circle color={dataParsed?.color} fill={dataParsed?.color} />

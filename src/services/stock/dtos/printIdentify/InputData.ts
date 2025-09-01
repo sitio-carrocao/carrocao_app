@@ -1,5 +1,6 @@
 interface IPrintIdentifyInputData {
   identify: string
+  name: string
   type: 'QRCODE' | 'BARCODE'
 }
 
